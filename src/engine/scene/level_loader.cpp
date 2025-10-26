@@ -74,7 +74,7 @@ bool LevelLoader::loadLevel(std::string_view level_path, Scene& scene) {
         }
 
         // 根据图层类型决定加载方法
-        if (layer_type == "imagelayer") {       
+        if (layer_type == "imagelayer") {
             loadImageLayer(layer_json, scene);
         } else if (layer_type == "tilelayer") {
             loadTileLayer(layer_json, scene);
@@ -101,16 +101,16 @@ void LevelLoader::loadImageLayer(const nlohmann::json& layer_json, Scene& scene)
 
     // 获取图层偏移量（json中没有则代表未设置，给默认值即可）
     const glm::vec2 offset = glm::vec2(layer_json.value("offsetx", 0.0f), layer_json.value("offsety", 0.0f));
-    
+
     // 获取视差因子及重复标志
     const glm::vec2 scroll_factor = glm::vec2(layer_json.value("parallaxx", 1.0f), layer_json.value("parallaxy", 1.0f));
     const glm::bvec2 repeat = glm::bvec2(layer_json.value("repeatx", false), layer_json.value("repeaty", false));
-    
+
     // 获取图层名称
     std::string layer_name = layer_json.value("name", "Unnamed");
-    
+
     /*  可用类似方法获取其它各种属性，这里我们暂时用不上 */
-    
+
     // 创建游戏对象
     auto game_object = std::make_unique<engine::object::GameObject>(layer_name);
     // 依次添加Transform，Parallax组件
@@ -170,9 +170,9 @@ void LevelLoader::loadObjectLayer(const nlohmann::json& layer_json, Scene& scene
                 continue;       // TODO: 椭圆对象的处理方式
             } else if (object.value("polygon", false)) {    // 如果是多边形对象
                 continue;       // TODO: 多边形对象的处理方式
-            } 
+            }
             // 没有这些标识则默认是矩形对象
-            else {  
+            else {
                 // --- 创建游戏对象并添加TransfromComponent ---
                 std::string object_name = object.value("name", "Unnamed");
                 auto game_object = std::make_unique<engine::object::GameObject>(object_name);
@@ -184,14 +184,14 @@ void LevelLoader::loadObjectLayer(const nlohmann::json& layer_json, Scene& scene
                 game_object->addComponent<engine::component::TransformComponent>(position, glm::vec2(1.0f), rotation);
 
                 // --- 添加碰撞组件和物理组件 ---
-                    // 碰撞盒大小与dst_size相同 
+                    // 碰撞盒大小与dst_size相同
                 auto collider = std::make_unique<engine::physics::AABBCollider>(dst_size);
                 auto* cc = game_object->addComponent<engine::component::ColliderComponent>(std::move(collider));
                     // 自定义形状通常是trigger类型，除非显示指定 （因此默认为真）
                 cc->setTrigger(object.value("trigger", true));
                     // 添加物理组件，不受重力影响
                 game_object->addComponent<engine::component::PhysicsComponent>(&scene.getContext().getPhysicsEngine(), false);
-                
+
                 // 获取标签信息并设置
                 if (auto tag = getTileProperty<std::string>(object, "tag"); tag) {  // 如果有标签
                     game_object->setTag(tag.value());
@@ -243,7 +243,7 @@ void LevelLoader::loadObjectLayer(const nlohmann::json& layer_json, Scene& scene
                 game_object->setTag("solid");
             }
             // 如果非SOLID类型，检查自定义碰撞盒是否存在
-            else if (auto rect = getColliderRect(tile_json); rect) {  
+            else if (auto rect = getColliderRect(tile_json); rect) {
                 // 如果有，添加碰撞组件
                 auto collider = std::make_unique<engine::physics::AABBCollider>(rect->size);
                 auto* cc = game_object->addComponent<engine::component::ColliderComponent>(std::move(collider));
@@ -358,11 +358,11 @@ void LevelLoader::addAnimation(const nlohmann::json& anim_json, engine::componen
             }
             auto column = frame.get<int>();
             // 计算源矩形
-            SDL_FRect src_rect = { 
-                column * sprite_size.x, 
-                row * sprite_size.y, 
-                sprite_size.x, 
-                sprite_size.y 
+            SDL_FRect src_rect = {
+                column * sprite_size.x,
+                row * sprite_size.y,
+                sprite_size.x,
+                sprite_size.y
             };
             // 添加动画帧到 Animation
             animation->addFrame(src_rect, duration);
@@ -398,7 +398,7 @@ std::optional<engine::utils::Rect> LevelLoader::getColliderRect(const nlohmann::
     if (!objectgroup.contains("objects")) return std::nullopt;
     auto& objects = objectgroup["objects"];
     for (const auto& object : objects) {    // 一个图片只支持一个碰撞器。如果有多个，则返回第一个不为空的
-        auto rect = engine::utils::Rect(glm::vec2(object.value("x", 0.0f), object.value("y", 0.0f)), 
+        auto rect = engine::utils::Rect(glm::vec2(object.value("x", 0.0f), object.value("y", 0.0f)),
                                         glm::vec2(object.value("width", 0.0f), object.value("height", 0.0f)));
         if (rect.size.x > 0 && rect.size.y > 0) {
             return rect;
@@ -477,7 +477,7 @@ engine::component::TileInfo LevelLoader::getTileInfoByGid(int gid)
     if (tileset_it == tileset_data_.begin()) {
         spdlog::error("gid为 {} 的瓦片未找到图块集。", gid);
         return engine::component::TileInfo();
-    } 
+    }
     --tileset_it;  // 前移一个位置，这样就得到不大于gid的最近一个元素（我们需要的）
 
     const auto& tileset = tileset_it->second;
@@ -592,7 +592,7 @@ void LevelLoader::loadTileset(std::string_view tileset_path, int first_gid)
 
 std::string LevelLoader::resolvePath(std::string_view relative_path, std::string_view file_path)
 {
-    try {   
+    try {
     // 获取地图文件的父目录（相对于可执行文件） "assets/maps/level1.tmj" -> "assets/maps"
     auto map_dir = std::filesystem::path(file_path).parent_path();
     // 合并路径（相对于可执行文件）并返回。 /* std::filesystem::canonical：解析路径中的当前目录（.）和上级目录（..）导航符，
