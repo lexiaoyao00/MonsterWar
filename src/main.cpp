@@ -15,93 +15,128 @@
 #include <windows.h>
 #endif
 
+void ImGuiWindow1(){
+    static float volume_value = 0.5f;
+    ImGui::Begin("窗口1");                          // 创建一个窗口
+    ImGui::Text("这是第一个窗口");                           // 在窗口中显示文本
+    ImGui::SetWindowFontScale(1.5f);
+    if (ImGui::Button("按钮1", ImVec2(200, 60))){
+        spdlog::info("按钮1被点击了");
+    }
+    ImGui::SetWindowFontScale(1.0f);
+    if (ImGui::SliderFloat("音量", &volume_value, 0.0f, 1.0f)) { // 在窗口中添加一个滑动条
+        spdlog::info("音量被设置为: {}", volume_value);
+    }
+    ImGui::End();
+}
+
+void ImGuiWindow2(SDL_Renderer *renderer){
+    ImGui::Begin("窗口2");
+    // 显示图片
+    auto texture = IMG_LoadTexture(renderer, "assets/textures/Buildings/Castle.png");
+    if (texture) {
+        ImGui::Image(texture, ImVec2(256, 256));
+    } else {
+        spdlog::error("无法加载图片: {}", SDL_GetError());
+    }
+    ImGui::End();
+}
+
+void ImGuiOptionalSettings() {
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // 启用键盘控制
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // 启用游戏手柄控制
+
+    // 设置 ImGui 主题
+    ImGui::StyleColorsDark();
+    // ImGui::StyleColorsLight();
+
+    // 设置缩放
+    float main_scale = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay()); // 与系统缩放一致
+
+    ImGuiStyle& style = ImGui::GetStyle();
+    style.ScaleAllSizes(main_scale);    // 固定样式缩放比例
+    style.FontScaleDpi = main_scale;    // 设置初始字体缩放比例
+
+    //设置透明度
+    float window_alpha = 0.5f;
+
+    // 修改各个UI元素的透明度
+    style.Colors[ImGuiCol_WindowBg].w = window_alpha;
+    style.Colors[ImGuiCol_PopupBg].w = window_alpha;
+
+    // 设置字体，为了正确显示中文，我们需要加载支持中文的字体
+    ImFont* font = io.Fonts->AddFontFromFileTTF(
+        "assets/fonts/VonwaonBitmap-16px.ttf", // 字体文件路径
+        16.0f, // 字体大小
+        nullptr,  // 字体配置参数
+        io.Fonts->GetGlyphRangesChineseSimplifiedCommon() // 字符集范围
+    );
+    if (!font) {
+        // 如果字体加载失败，回退默认字体
+        io.Fonts->AddFontDefault();
+        spdlog::warn("警告：无法加载中文字体，中文字符将无法正确显示！");
+    }
+}
+
+void ImGuiInit(SDL_Window *window, SDL_Renderer *renderer) {
+    // 初始化 ImGui
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+
+    // 可选配置
+    ImGuiOptionalSettings();
+
+    // 初始化 ImGui 的 SDL3 和 SDLRenderer3 后端
+    ImGui_ImplSDL3_InitForSDLRenderer(window,renderer);
+    ImGui_ImplSDLRenderer3_Init(renderer);
+}
+
+void ImGuiLoop(SDL_Renderer *renderer) {
+    // 开始 ImGui 新的一轮循环
+    ImGui_ImplSDLRenderer3_NewFrame();
+    ImGui_ImplSDL3_NewFrame();
+    ImGui::NewFrame();
+
+    // 显示一个Demo窗口（UI 声明与逻辑交互）
+    // ImGui::ShowDemoWindow();
+    ImGuiWindow1();
+    ImGuiWindow2(renderer);
+
+    // 渲染 ImGui 界面
+    ImGui::Render();    // 生成绘图数据
+    ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), renderer);// 执行渲染
+}
+
+void ImGuiShutdown() {
+    // 清理 ImGui 的 SDL3 和 SDLRenderer3 后端
+    ImGui_ImplSDLRenderer3_Shutdown();
+    ImGui_ImplSDL3_Shutdown();
+
+    // 清理 ImGui
+    ImGui::DestroyContext();
+}
+
 int main(int, char**) {
 
     #ifdef WIN32
     SetConsoleOutputCP(CP_UTF8);
     #endif
 
-    // entt 测试
-    entt::registry registry;
-
-    entt::entity player = registry.create();
-    entt::entity enemy = registry.create();
-
-    std::cout << "Player entity ID: " << static_cast<uint32_t>(player) << std::endl;
-    std::cout << "Enemy entity ID: " << static_cast<uint32_t>(enemy) << std::endl;
-
-
-    spdlog::info("你好，世界！");
-    nlohmann::json json_data = {{"a",10}};
-    auto num = json_data["a"].get<int>();
-    spdlog::warn("json:{}",num);
-
-
-    glm::vec2 a = glm::vec2(1.0f, 2.0f);
-    glm::vec2 b = glm::vec2(3.0f, 4.0f);
-    auto c = a * b;
-    auto d = glm::distance(a, b);
-    SDL_Log("d = (%f)", d);
-
-    SDL_Log("c = (%f, %f)", c.x, c.y);
-
-    std::cout << "你好世界!" << std::endl;
     // SDL初始化
     if (!SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO)) {
         std::cerr << "SDL_Init Error: " << SDL_GetError() << std::endl;
         return 1;
     }
     // 创建窗口
-    SDL_Window *window = SDL_CreateWindow("Hello World!", 1080, 720, 0);
+    SDL_Window *window = SDL_CreateWindow("Hello World!", 1080, 720, SDL_WINDOW_RESIZABLE);
     // 创建渲染器
     SDL_Renderer *renderer = SDL_CreateRenderer(window, NULL);
 
-    // SDL3_Image不需要手动初始化
-
-    // 加载图片
-    SDL_Texture *texture = IMG_LoadTexture(renderer, "assets/textures/UI/title.png");
-
-    // SDL_Mixer初始化
-    if (!Mix_OpenAudio(0, NULL)) {
-        std::cerr << "Mix_OpenAudio Error: " << SDL_GetError() << std::endl;
-        return 1;
-    }
-
-    // 读取音乐
-    Mix_Music *music = Mix_LoadMUS("assets/audio/4 Battle Track INTRO TomMusic.ogg");
-    // 播放音乐
-    Mix_PlayMusic(music, -1);
-
-    // SDL_TTF初始化
-    if (!TTF_Init()) {
-        std::cerr << "TTF_Init Error: " << SDL_GetError() << std::endl;
-        return 1;
-    }
-    // 加载字体
-    TTF_Font *font = TTF_OpenFont("assets/fonts/VonwaonBitmap-16px.ttf", 24);
-
-    // 创建文本纹理
-    SDL_Color color = {255, 255, 255, 255};
-    SDL_Surface *surface = TTF_RenderText_Solid(font, "Hello, SDL! 中文也可以", 0, color);
-    SDL_Texture *textTexture = SDL_CreateTextureFromSurface(renderer, surface);
-
-    // SDL3 新的绘制文本方法
-    TTF_TextEngine *textEngine = TTF_CreateRendererTextEngine(renderer);
-    TTF_Text *text = TTF_CreateText(textEngine, font, "SDL3 新的文本渲染方式", 0);
-    TTF_SetTextColor(text, 255, 0, 0, 255);
-    TTF_SetTextWrapWidth(text, 50);
-    // Do something with the window and renderer here...
-
-
     // ImGui 测试
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    // 初始化 ImGui 的 SDL3 和 SDL_Renderer3 后端
-    ImGui_ImplSDL3_InitForSDLRenderer(window, renderer);
-    ImGui_ImplSDLRenderer3_Init(renderer);
+    ImGuiInit(window, renderer);
 
     // 渲染循环
-    glm::vec2 mousePos = glm::vec2(0.0f, 0.0f);
     while (true) {
         SDL_Event event;
         if (SDL_PollEvent(&event)) {
@@ -112,78 +147,23 @@ int main(int, char**) {
             // ImGui 处理事件
             ImGui_ImplSDL3_ProcessEvent(&event);
         }
-        // ImGui 渲染
-        ImGui_ImplSDLRenderer3_NewFrame();
-        ImGui_ImplSDL3_NewFrame();
-        ImGui::NewFrame();
 
-        // ImGui 窗口
-        ImGui::ShowDemoWindow();
-
-
-
-
-
-        auto state = SDL_GetMouseState(&mousePos.x, &mousePos.y);
-        // SDL_Log("Mouse Pos: (%f, %f)", mousePos.x, mousePos.y);
-        if (state & SDL_BUTTON_LMASK) {
-            SDL_Log("Left Button Down");
-        }
-        if (state & SDL_BUTTON_RMASK) {
-            SDL_Log("Right Button Down");
-        }
         // 清屏
         SDL_RenderClear(renderer);
-        // 画一个长方形
-        SDL_FRect rect = {100, 100, 200, 200};
-        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-        SDL_RenderFillRect(renderer, &rect);
+
+        // ImGui 渲染，一轮循环内，ImGui 需要做的操作（逻辑 + 渲染）
+        ImGuiLoop(renderer);
 
 
-        // 画图片
-        SDL_FRect dstrect = {200, 200, 200, 200};
-        SDL_RenderTexture(renderer, texture, NULL, &dstrect);
-
-        // 画文本
-        SDL_FRect textRect = {300, 300, static_cast<float>(surface->w), static_cast<float>(surface->h)};
-        SDL_RenderTexture(renderer, textTexture, NULL, &textRect);
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-
-        // 新的画文本方法：
-        TTF_DrawRendererText(text, 400, 400);
-
-
-        // ImGui 将内容渲染出来
-        ImGui::Render();
-        ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), renderer);
-
-        // 更新屏幕
+        // SDL 更新屏幕
         SDL_RenderPresent(renderer);
-
-
-
     }
 
     // ImGui 清理
-    ImGui_ImplSDLRenderer3_Shutdown();
-    ImGui_ImplSDL3_Shutdown();
-    ImGui::DestroyContext();
+    ImGuiShutdown();
 
-    // 清理图片资源
-    SDL_DestroyTexture(texture);
 
-    // 清理音乐资源
-    Mix_FreeMusic(music);
-    Mix_CloseAudio();
-    Mix_Quit();
-
-    // 清理字体资源
-    SDL_DestroySurface(surface);
-    SDL_DestroyTexture(textTexture);
-    TTF_CloseFont(font);
-    TTF_Quit();
-
-    // 清理并退出
+    // SDL 清理并退出
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
