@@ -10,8 +10,10 @@
 #include "../render/text_renderer.h"
 #include "../input/input_manager.h"
 #include "../scene/scene_manager.h"
+#include "../utils/events.h"
 #include <SDL3/SDL.h>
 #include <spdlog/spdlog.h>
+#include <entt/signal/dispatcher.hpp>
 
 namespace engine::core {
 
@@ -33,8 +35,6 @@ void GameApp::run() {
     while (is_running_) {
         time_->update();
         float delta_time = time_->getDeltaTime();
-        input_manager_->update();   // 每帧首先更新输入管理器
-
         handleEvents();
         update(delta_time);
         render();
@@ -45,7 +45,7 @@ void GameApp::run() {
     close();
 }
 
-void GameApp::registerSceneSetup(std::function<void(engine::scene::SceneManager &)> func)
+void GameApp::registerSceneSetup(std::function<void(engine::core::Context&)> func)
 {
     scene_setup_func_ = std::move(func);
     spdlog::trace("已注册场景设置函数。");
@@ -57,6 +57,7 @@ bool GameApp::init() {
         spdlog::error("未注册场景设置函数，无法初始化 GameApp。");
         return false;
     }
+    if (!initDispatcher()) return false;
     if (!initConfig()) return false;
     if (!initSDL())  return false;
     if (!initTime()) return false;
@@ -72,7 +73,10 @@ bool GameApp::init() {
     if (!initSceneManager()) return false;
 
     // 调用场景设置函数 (创建第一个场景并压入栈)
-    scene_setup_func_(*scene_manager_);
+    scene_setup_func_(*context_);
+
+    // 注册退出事件（回调函数可以无参数，代表不适用事件结构体中的数据）
+    dispatcher_->sink<utils::QuitEvent>().connect<&GameApp::onQuitEvent>(this);
 
     is_running_ = true;
     spdlog::trace("GameApp 初始化成功。");
@@ -80,11 +84,7 @@ bool GameApp::init() {
 }
 
 void GameApp::handleEvents() {
-    if (input_manager_->shouldQuit()) {
-        spdlog::trace("GameApp 收到来自 InputManager 的退出请求。");
-        is_running_ = false;
-        return;
-    }
+    input_manager_->update();   // 每帧首先更新输入管理器
 
     scene_manager_->handleInput();
 }
@@ -92,6 +92,9 @@ void GameApp::handleEvents() {
 void GameApp::update(float delta_time) {
     // 游戏逻辑更新
     scene_manager_->update(delta_time);
+
+    // 分发事件
+    dispatcher_->update();
 }
 
 void GameApp::render() {
@@ -107,6 +110,10 @@ void GameApp::render() {
 
 void GameApp::close() {
     spdlog::trace("关闭 GameApp ...");
+
+    // 断开事件处理函数
+    dispatcher_->sink<utils::QuitEvent>().disconnect<&GameApp::onQuitEvent>(this);
+
     // 先关闭场景管理器，确保所有场景都被清理
     scene_manager_->close();
 
@@ -123,6 +130,21 @@ void GameApp::close() {
     }
     SDL_Quit();
     is_running_ = false;
+}
+
+bool GameApp::initDispatcher()
+{
+    try
+    {
+        dispatcher_ = std::make_unique<entt::dispatcher>();
+    }
+    catch(const std::exception& e)
+    {
+        spdlog::error("初始化事件分发器失败: {}", e.what());
+        return false;
+    }
+    spdlog::trace("事件分发器初始化成功。");
+    return true;
 }
 
 bool GameApp::initConfig()
@@ -244,7 +266,7 @@ bool GameApp::initTextRenderer()
 bool GameApp::initInputManager()
 {
     try {
-        input_manager_ = std::make_unique<engine::input::InputManager>(sdl_renderer_, config_.get());
+        input_manager_ = std::make_unique<engine::input::InputManager>(sdl_renderer_, config_.get(),dispatcher_.get());
     } catch (const std::exception& e) {
         spdlog::error("初始化输入管理器失败: {}", e.what());
         return false;
@@ -267,7 +289,8 @@ bool GameApp::initGameState()
 bool GameApp::initContext()
 {
     try {
-        context_ = std::make_unique<engine::core::Context>(*input_manager_,
+        context_ = std::make_unique<engine::core::Context>(*dispatcher_,
+                                                           *input_manager_,
                                                            *renderer_,
                                                            *camera_,
                                                            *text_renderer_,
@@ -291,6 +314,12 @@ bool GameApp::initSceneManager()
     }
     spdlog::trace("场景管理器初始化成功。");
     return true;
+}
+
+void GameApp::onQuitEvent()
+{
+    spdlog::trace("GameApp 收到来自事件分发器的退出请求。");
+    is_running_ = false;
 }
 
 } // namespace engine::core

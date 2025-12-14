@@ -8,7 +8,7 @@ namespace game::scene {
 
 class GameScene : public engine::scene::Scene {
 public:
-    GameScene(engine::core::Context& context, engine::scene::SceneManager& sceneManager);
+    GameScene(engine::core::Context& context);
     ~GameScene();
 
     void init() override;
@@ -16,8 +16,11 @@ public:
 
 private:
     // ----- 测试输入回调事件 ------
-    void onAttack();
-    void onJump();
+    int scene_num_{0};
+    bool onReplace();
+    bool onPush();
+    bool onPop();
+    bool onQuit();
 };
 
 }   // namespace game::scene
