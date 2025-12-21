@@ -1,25 +1,27 @@
 #pragma once
-#include <memory>       // 用于 std::unique_ptr
-#include <stdexcept>    // 用于 std::runtime_error
-#include <string>       // 用于 std::string
-#include <string_view> // 用于 std::string_view
-#include <unordered_map> // 用于 std::unordered_map
-#include <utility>      // 用于 std::pair
-#include <functional>   // 用于 std::hash
-
-#include <SDL3_ttf/SDL_ttf.h> // SDL_ttf 主头文件
+#include <memory>
+#include <unordered_map>
+#include <utility>
+#include <string_view>
+#include <entt/core/fwd.hpp>
+#include <SDL3_ttf/SDL_ttf.h>
 
 namespace engine::resource {
 
 // 定义字体键类型（路径 + 大小）
-using FontKey = std::pair<std::string, int>;        // std::pair 是标准库中的一个类模板，用于将两个值组合成一个单元
+using FontKey = std::pair<entt::id_type, int>;
 
-// FontKey 的自定义哈希函数（std::pair<std::string, int>），用于 std::unordered_map
+/**
+ * @brief FontKey 的自定义哈希函数，适用于 std::unordered_map。
+ *        使用标准库推荐的哈希合并方式，避免简单异或带来的哈希冲突。
+ */
 struct FontKeyHash {
-    std::size_t operator()(const FontKey& key) const {
-        std::hash<std::string> string_hasher;
-        std::hash<int> int_hasher;
-        return string_hasher(key.first) ^ int_hasher(key.second);       // 异或运算符 ^ 按位计算，每一位的两个值不同为1，相同为0，这是合并两个哈希值的简单方法
+    std::size_t operator()(const FontKey& key) const noexcept {
+        // 采用C++20标准库的hash_combine实现思路
+        std::size_t h1 = std::hash<entt::id_type>{}(key.first);
+        std::size_t h2 = std::hash<int>{}(key.second);
+        // 推荐的哈希合并方式，参考boost::hash_combine
+        return h1 ^ (h2 + 0x9e3779b9 + (h1 << 6) + (h1 >> 2));
     }
 };
 
@@ -42,7 +44,7 @@ private:
         }
     };
 
-    // 字体存储（FontKey -> TTF_Font）。  
+    // 字体存储（FontKey -> TTF_Font）。
     // unordered_map 的键需要能转换为哈希值，对于基础数据类型，系统会自动转换
     // 但是对于对于自定义类型（系统无法自动转化），则需要提供自定义哈希函数（第三个模版参数）
     std::unordered_map<FontKey, std::unique_ptr<TTF_Font, SDLFontDeleter>, FontKeyHash> fonts_;
@@ -53,7 +55,7 @@ public:
      * @throws std::runtime_error 如果 SDL_ttf 初始化失败。
      */
     FontManager();
-    
+
     ~FontManager();            ///< @brief 需要手动添加析构函数，清理资源并关闭 SDL_ttf。
 
     // 当前设计中，我们只需要一个FontManager，所有权不变，所以不需要拷贝、移动相关构造及赋值运算符
@@ -63,11 +65,59 @@ public:
     FontManager& operator=(FontManager&&) = delete;
 
 private: // 仅由 ResourceManager（和内部）访问的方法
-    
-    TTF_Font* loadFont(std::string_view file_path, int point_size);     ///< @brief 从文件路径加载指定点大小的字体
-    TTF_Font* getFont(std::string_view file_path, int point_size);      ///< @brief 尝试获取已加载字体的指针，如果未加载则尝试加载
-    void unloadFont(std::string_view file_path, int point_size);        ///< @brief 卸载特定字体（通过路径和大小标识）
-    void clearFonts();                                                    ///< @brief 清空所有缓存的字体
+    /**
+     * @brief 从文件路径加载指定点大小的字体
+     * @param id 字体的唯一标识符, 通过entt::hashed_string生成
+     * @param point_size 字体的点大小
+     * @param file_path 字体文件的路径
+     * @return 加载的字体的指针
+     * @note 如果字体已经加载，则返回已加载字体的指针
+     * @note 如果字体未加载，则从文件路径加载字体，并返回加载的字体的指针
+     */
+    TTF_Font* loadFont(entt::id_type id, int point_size, std::string_view file_path);
+
+    /**
+     * @brief 从字符串哈希值加载指定点大小的字体
+     * @param str_hs entt::hashed_string类型
+     * @param point_size 字体的点大小
+     * @return 加载的字体的指针
+     * @note 如果字体已经加载，则返回已加载字体的指针
+     * @note 如果字体未加载，则从哈希字符串对应的文件路径加载字体，并返回加载的字体的指针
+     */
+    TTF_Font* loadFont(entt::hashed_string str_hs, int point_size);
+
+    /**
+     * @brief 尝试获取已加载字体的指针，如果未加载则尝试加载
+     * @param id 字体的唯一标识符, 通过entt::hashed_string生成
+     * @param point_size 字体的点大小
+     * @param file_path 字体文件的路径
+     * @return 加载的字体的指针
+     * @note 如果字体已经加载，则返回已加载字体的指针
+     * @note 如果字体未加载，且提供了file_path，则尝试从文件路径加载字体，并返回加载的字体的指针
+     */
+    TTF_Font* getFont(entt::id_type id, int point_size, std::string_view file_path = "");
+
+    /**
+     * @brief 从字符串哈希值获取字体
+     * @param str_hs entt::hashed_string类型
+     * @param point_size 字体的点大小
+     * @return 加载的字体的指针
+     * @note 如果字体已经加载，则返回已加载字体的指针
+     * @note 如果字体未加载，则从哈希字符串对应的文件路径加载字体，并返回加载的字体的指针
+     */
+    TTF_Font* getFont(entt::hashed_string str_hs, int point_size);
+
+    /**
+     * @brief 卸载特定字体（通过路径哈希值和大小标识）
+     * @param id 字体的唯一标识符, 通过entt::hashed_string生成
+     * @param point_size 字体的点大小
+     */
+    void unloadFont(entt::id_type id, int point_size);
+
+    /**
+     * @brief 清空所有缓存的字体
+     */
+    void clearFonts();
 };
 
 } // namespace engine::resource

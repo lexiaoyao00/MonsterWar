@@ -10,7 +10,7 @@ namespace engine::render {
 
 // 构造函数: 执行初始化，增加 ResourceManager
 Renderer::Renderer(SDL_Renderer* sdl_renderer, engine::resource::ResourceManager* resource_manager)
-    : renderer_(sdl_renderer), resource_manager_(resource_manager) 
+    : renderer_(sdl_renderer), resource_manager_(resource_manager)
 {
     spdlog::trace("构造 Renderer...");
     if (!renderer_) {
@@ -44,8 +44,8 @@ void Renderer::drawSprite(const Camera& camera, const Sprite& sprite, const glm:
     float scaled_w = src_rect.value().w * scale.x;
     float scaled_h = src_rect.value().h * scale.y;
     SDL_FRect dest_rect = {
-        position_screen.x, 
-        position_screen.y, 
+        position_screen.x,
+        position_screen.y,
         scaled_w,
         scaled_h
     };
@@ -58,7 +58,7 @@ void Renderer::drawSprite(const Camera& camera, const Sprite& sprite, const glm:
     // 执行绘制(默认旋转中心为精灵的中心点)
     if (!SDL_RenderTextureRotated(renderer_, texture, &src_rect.value(), &dest_rect, angle, NULL, sprite.isFlipped() ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE)) {
         spdlog::error("渲染旋转纹理失败（ID: {}）：{}", sprite.getTextureId(), SDL_GetError());
-    }   
+    }
 }
 
 void Renderer::drawParallax(const Camera &camera, const Sprite &sprite, const glm::vec2 &position, const glm::vec2 &scroll_factor, glm::bvec2 repeat, const glm::vec2 &scale)
@@ -78,7 +78,7 @@ void Renderer::drawParallax(const Camera &camera, const Sprite &sprite, const gl
     // 应用相机变换
     glm::vec2 position_screen = camera.worldToScreenWithParallax(position, scroll_factor);
 
-    // 计算缩放后的纹理尺寸 
+    // 计算缩放后的纹理尺寸
     float scaled_tex_w = src_rect.value().w * scale.x;
     float scaled_tex_h = src_rect.value().h * scale.y;
 
@@ -183,16 +183,21 @@ std::optional<SDL_FRect> Renderer::getSpriteSrcRect(const Sprite &sprite)
     }
 
     auto src_rect = sprite.getSourceRect();
-    if (src_rect.has_value()) {     // 如果Sprite中存在指定rect，则判断尺寸是否有效
-        if (src_rect.value().w <= 0 || src_rect.value().h <= 0) {
-            spdlog::error("源矩形尺寸无效，ID: {}", sprite.getTextureId());
+    if (src_rect.has_value()) {     // 如果Image中存在指定rect，则判断尺寸是否有效
+        if (src_rect.value().size.x <= 0 || src_rect.value().size.y <= 0) {
+            spdlog::error("源矩形尺寸无效，ID: {}, path: {}", sprite.getTextureId(), sprite.getTexturePath());
             return std::nullopt;
         }
-        return src_rect;
+        return SDL_FRect{
+            src_rect.value().position.x,
+            src_rect.value().position.y,
+            src_rect.value().size.x,
+            src_rect.value().size.y
+        };
     } else {                        // 否则获取纹理尺寸并返回整个纹理大小
         SDL_FRect result = {0, 0, 0, 0};
         if (!SDL_GetTextureSize(texture, &result.w, &result.h)) {
-            spdlog::error("无法获取纹理尺寸，ID: {}", sprite.getTextureId());
+            spdlog::error("无法获取纹理尺寸，ID: {}, path: {}", sprite.getTextureId(), sprite.getTexturePath());
             return std::nullopt;
         }
         return result;

@@ -1,7 +1,7 @@
 #pragma once
 #include <SDL3/SDL_render.h>
-#include <string>
 #include <string_view>
+#include <entt/core/hashed_string.hpp>
 #include <glm/vec2.hpp>
 #include "../utils/math.h"
 
@@ -23,7 +23,7 @@ class TextRenderer final {
 private:
     SDL_Renderer* sdl_renderer_ = nullptr;                          ///< @brief 持有渲染器的非拥有指针
     engine::resource::ResourceManager* resource_manager_ = nullptr; ///< @brief 持有资源管理器的非拥有指针
-    
+
     TTF_TextEngine* text_engine_ = nullptr;         ///< @brief 使用SDL3引入的 TTF_TextEngine 来进行绘制
 
 public:
@@ -42,19 +42,19 @@ public:
 
     /**
      * @brief 绘制UI上的字符串。
-     *        
+     *
      * @param text UTF-8 字符串内容。
      * @param font_id 字体 ID。
      * @param font_size 字体大小。
      * @param position 左上角屏幕位置。
      * @param color 文本颜色。(默认为白色)
      */
-    void drawUIText(std::string_view text, std::string_view font_id, int font_size, 
+    void drawUIText(std::string_view text, entt::id_type font_id, int font_size,
                   const glm::vec2& position, const engine::utils::FColor& color = {1.0f, 1.0f, 1.0f, 1.0f});
 
     /**
      * @brief 绘制地图上的字符串。
-     *        
+     *
      * @param camera 相机
      * @param text UTF-8 字符串内容。
      * @param font_id 字体 ID。
@@ -62,7 +62,7 @@ public:
      * @param position 左上角屏幕位置。
      * @param color 文本颜色。
      */
-    void drawText(const Camera& camera, std::string_view text, std::string_view font_id, int font_size, 
+    void drawText(const Camera& camera, std::string_view text, entt::id_type font_id, int font_size,
                   const glm::vec2& position, const engine::utils::FColor& color = {1.0f, 1.0f, 1.0f, 1.0f});
 
     /**
@@ -73,7 +73,7 @@ public:
      * @param font_size 字体大小。
      * @return 文本的尺寸。
      */
-    glm::vec2 getTextSize(std::string_view text, std::string_view font_id, int font_size);
+    glm::vec2 getTextSize(std::string_view text, entt::id_type font_id, int font_size, std::string_view font_path = "");
 
     // 禁用拷贝和移动语义
     TextRenderer(const TextRenderer&) = delete;

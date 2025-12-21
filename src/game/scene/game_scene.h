@@ -15,12 +15,8 @@ public:
     void clean() override;
 
 private:
-    // ----- 测试输入回调事件 ------
-    int scene_num_{0};
-    bool onReplace();
-    bool onPush();
-    bool onPop();
-    bool onQuit();
+    // --- 测试资源管理器 ---
+    void testResourceManager();
 };
 
 }   // namespace game::scene
