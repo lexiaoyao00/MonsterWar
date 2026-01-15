@@ -1,34 +1,22 @@
 #pragma once
-#include "../render/image.h"
-#include "component.h"
 #include <vector>
+#include <optional>
 #include <glm/vec2.hpp>
+#include <nlohmann/json.hpp>
 
-namespace engine::render {
-class Image;
-}
-
-namespace engine::core {
-class Context;
-}
+#include "sprite_component.h"
+#include "animation_component.h"
 
 namespace engine::component {
 /**
  * @brief 定义瓦片的类型，用于游戏逻辑（例如碰撞）。
+ * @note 当前项目并未使用到此信息
  */
 enum class TileType {
     EMPTY,      ///< @brief 空白瓦片
     NORMAL,     ///< @brief 普通瓦片
     SOLID,      ///< @brief 静止可碰撞瓦片
-    UNISOLID,   ///< @brief 单向静止可碰撞瓦片
-    SLOPE_0_1,  ///< @brief 斜坡瓦片，高度:左0  右1
-    SLOPE_1_0,  ///< @brief 斜坡瓦片，高度:左1  右0
-    SLOPE_0_2,  ///< @brief 斜坡瓦片，高度:左0  右1/2
-    SLOPE_2_1,  ///< @brief 斜坡瓦片，高度:左1/2右1
-    SLOPE_1_2,  ///< @brief 斜坡瓦片，高度:左1  右1/2
-    SLOPE_2_0,  ///< @brief 斜坡瓦片，高度:左1/2右0
     HAZARD,     ///< @brief 危险瓦片（例如火焰、尖刺等）
-    LADDER,     ///< @brief 梯子瓦片
     // 未来补充其它类型
 };
 
@@ -36,78 +24,42 @@ enum class TileType {
  * @brief 包含单个瓦片的渲染和逻辑信息。
  */
 struct TileInfo {
-    render::Image sprite;      ///< @brief 瓦片的视觉表示
-    TileType type;              ///< @brief 瓦片的逻辑类型
-    TileInfo(render::Image s = render::Image(), TileType t = TileType::EMPTY) : sprite(std::move(s)), type(t) {}
+    engine::component::SpriteComponent sprite_;         // 精灵
+    TileType type_;              ///< @brief 瓦片的逻辑类型
+    std::optional<engine::component::Animation> animation_;  // 动画（支持Tiled动画图块）
+    std::optional<nlohmann::json> properties_; // 属性（存放自定义属性，方便LevelLoade解析）
+
+    TileInfo() = default;
+    TileInfo(engine::component::Sprite sprite,
+            engine::component::TileType type,
+            std::optional<engine::component::Animation> animation = std::nullopt,
+            std::optional<nlohmann::json> properties = std::nullopt)
+            : sprite_(std::move(sprite)),
+            type_(type),
+            animation_(std::move(animation)),
+            properties_(std::move(properties)) {}
+
 };
 
+
 /**
- * @brief 管理和渲染瓦片地图层。
+ * @brief 瓦片层组件，包含瓦片大小，地图大小和瓦片实体列表
+ * @note 现在瓦片层更像一个容器，只是存储所有的"瓦片"，而每个瓦片是一个实体。
  *
- * 存储瓦片地图的布局、每个瓦片的精灵信息和类型。
- * 负责在渲染阶段绘制可见的瓦片。
  */
-class TileLayerComponent final : public Component {
-    friend class engine::object::GameObject;
-private:
-    glm::ivec2 tile_size_;              ///< @brief 单个瓦片尺寸（像素）
-    glm::ivec2 map_size_;               ///< @brief 地图尺寸（瓦片数）
-    std::vector<TileInfo> tiles_;       ///< @brief 存储所有瓦片信息 (按"行主序"存储, index = y * map_width_ + x)
-    glm::vec2 offset_ = {0.0f, 0.0f};   ///< @brief 瓦片层在世界中的偏移量 (瓦片层通常不需要缩放及旋转，因此不引入Transform组件)
-                                                 // offset_ 最好也保持默认的0，以免增加不必要的复杂性
-    bool is_hidden_ = false;            ///< @brief 是否隐藏（不渲染）
+struct TileLayerComponent {
+    glm::ivec2 tile_size_;       ///< @brief 瓦片大小
+    glm::ivec2 map_size_;       ///< @brief 地图大小
+    std::vector<entt::entity> tiles_;  ///< @brief 瓦片实体列表，每个瓦片对应一个实体，按顺序排列
 
-public:
-    TileLayerComponent() = default;
 
-    /**
-     * @brief 构造函数
-     * @param tile_size 单个瓦片尺寸（像素）
-     * @param map_size 地图尺寸（瓦片数）
-     * @param tiles 初始化瓦片数据的容器 (会被移动)
-     */
-    TileLayerComponent(glm::ivec2 tile_size, glm::ivec2 map_size, std::vector<TileInfo>&& tiles);
+    TileLayerComponent(glm::ivec2 tile_size,
+            glm::ivec2 map_size,
+            std::vector<entt::entity> tiles) :
+            tile_size_(std::move(tile_size)),
+            map_size_(std::move(map_size)),
+            tiles_(std::move(tiles)) {}
 
-    /**
-     * @brief 根据瓦片坐标获取瓦片信息
-     * @param pos 瓦片坐标 (0 <= x < map_size_.x, 0 <= y < map_size_.y)
-     * @return const TileInfo* 指向瓦片信息的指针，如果坐标无效则返回 nullptr
-     */
-    const TileInfo* getTileInfoAt(glm::ivec2 pos) const;
-
-    /**
-     * @brief 根据瓦片坐标获取瓦片类型
-     * @param pos 瓦片坐标 (0 <= x < map_size_.x, 0 <= y < map_size_.y)
-     * @return TileType 瓦片类型，如果坐标无效则返回 TileType::EMPTY
-     */
-    TileType getTileTypeAt(glm::ivec2 pos) const;
-
-     /**
-      * @brief 根据世界坐标获取瓦片类型
-      * @param world_pos 世界坐标
-      * @return TileType 瓦片类型，如果坐标无效或对应空瓦片则返回 TileType::EMPTY
-      */
-    TileType getTileTypeAtWorldPos(const glm::vec2& world_pos) const;
-
-    // getters and setters
-    glm::ivec2 getTileSize() const { return tile_size_; }               ///< @brief 获取单个瓦片尺寸
-    glm::ivec2 getMapSize() const { return map_size_; }                 ///< @brief 获取地图尺寸
-    glm::vec2 getWorldSize() const {                                    ///< @brief 获取地图世界尺寸
-        return glm::vec2(map_size_.x * tile_size_.x, map_size_.y * tile_size_.y);
-    }
-    const std::vector<TileInfo>& getTiles() const { return tiles_; }    ///< @brief 获取瓦片容器
-    const glm::vec2& getOffset() const { return offset_; }              ///< @brief 获取瓦片层的偏移量
-    bool isHidden() const { return is_hidden_; }                        ///< @brief 获取是否隐藏（不渲染）
-
-    void setOffset(glm::vec2 offset) { offset_ = std::move(offset); }       ///< @brief 设置瓦片层的偏移量
-    void setHidden(bool hidden) { is_hidden_ = hidden; }                ///< @brief 设置是否隐藏（不渲染）
-
-protected:
-    // 核心循环方法
-    void init() override;
-    void update(float, engine::core::Context&) override {}
-    void render(engine::core::Context& context) override;
-    void clean() override;
 };
 
 } // namespace engine::component

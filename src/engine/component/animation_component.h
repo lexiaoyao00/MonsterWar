@@ -1,63 +1,73 @@
 #pragma once
-#include "./component.h"
 #include <string>
-#include <string_view>
+#include <vector>
 #include <unordered_map>
-#include <memory>
+// #include <entt/fwd.hpp>
+#include <entt/entity/entity.hpp>
 
-namespace engine::render {
-    class Animation;
-}
-namespace engine::component {
-    class SpriteComponent;
-}
+#include "../utils/math.h"
+
 
 namespace engine::component {
 
 /**
- * @brief GameObject的动画组件。
+ * @brief 动画帧数据结构
  *
- * 持有一组Animation对象并控制其播放，
- * 根据当前帧更新关联的SpriteComponent。
+ * 包含帧源矩形和帧间隔（毫秒）
  */
-class AnimationComponent : public Component {
-    friend class engine::object::GameObject;
-private:
-    /// @brief 动画名称到Animation对象的映射。
-    std::unordered_map<std::string, std::unique_ptr<engine::render::Animation>> animations_;
-    SpriteComponent* sprite_component_ = nullptr;               ///< @brief 指向必需的SpriteComponent的指针
-    engine::render::Animation* current_animation_ = nullptr;    ///< @brief 指向当前播放动画的原始指针
+struct AnimationFrame{
+    engine::utils::Rect stc_rect_{};    // 帧源矩形
+    float durationi_ms_{100.0f};    // 帧间隔（毫秒 ）
 
-    float animation_timer_ = 0.0f;          ///< @brief 动画播放中的计时器
-    bool is_playing_ = false;               ///< @brief 当前是否有动画正在播放
-    bool is_one_shot_removal_ = false;      ///< @brief 是否在动画结束后删除整个GameObject
+    AnimationFrame(engine::utils::Rect stc_rect, float durationi_ms = 100.0f)
+    : stc_rect_(std::move(stc_rect)), durationi_ms_(durationi_ms) {}
+};
 
-public:
-    AnimationComponent() = default;
-    ~AnimationComponent() override;
+/**
+ * @brief 动画数据结构
+ *
+ * 包含动画名称、帧列表、总时长、当前播放时间、是否循环等属性。
+ */
+struct Animation {
+    std::vector<AnimationFrame> frames_;    // 动画帧
+    float total_duration_ms_{};    // 动画总时长（毫秒）
+    bool loop_{true};    // 是否循环播放
 
-    // 删除复制/移动操作
-    AnimationComponent(const AnimationComponent&) = delete;
-    AnimationComponent& operator=(const AnimationComponent&) = delete;
-    AnimationComponent(AnimationComponent&&) = delete;
-    AnimationComponent& operator=(AnimationComponent&&) = delete;
+    Animation(std::vector<AnimationFrame> frames,
+              bool loop = true) :
+              frames_(std::move(frames)),
+              loop_(loop) {
 
-    void addAnimation(std::unique_ptr<engine::render::Animation> animation);    ///< @brief 向 animations_ map容器中添加一个动画。
-    void playAnimation(std::string_view name);    ///< @brief 播放指定名称的动画。
-    void stopAnimation() { is_playing_ = false; }   ///< @brief 停止当前动画播放。
-    void resumeAnimation() {is_playing_ = true; }   ///< @brief 恢复当前动画播放。
+        total_duration_ms_ = 0;
+        for (const auto& frame : frames_) {
+            total_duration_ms_ += frame.durationi_ms_;
+        }
+    }
+};
 
-    // --- Getters and Setters ---
-    std::string_view getCurrentAnimationName() const;
-    bool isPlaying() const { return is_playing_; }
-    bool isAnimationFinished() const;
-    bool isOneShotRemoval() const { return is_one_shot_removal_; }
-    void setOneShotRemoval(bool is_one_shot_removal) { is_one_shot_removal_ = is_one_shot_removal; }
+/**
+ * @brief 动画组件
+ *
+ * 包含动画名称、帧列表、总时长、当前播放时间、是否循环等属性。
+ */
+struct AnimationComponent {
+    std::unordered_map<entt::id_type, Animation> animations_;    // 动画集合
+    entt::id_type current_animation_id_{entt::null};    // 当前播放的动画名称
+    size_t current_frame_index_{};    // 当前播放的帧索引
+    float current_time_ms_{};       // 当前播放时间（毫秒），用以区别每一帧的播放时间
+    float speed_{1.0f};    // 播放速度
 
-protected:
-    // 核心循环方法
-    void init() override;
-    void update(float, engine::core::Context&) override;
+    AnimationComponent(std::unordered_map<entt::id_type, Animation> animations,
+                       entt::id_type current_animation_id,
+                       size_t current_frame_index = 0,
+                       float current_time_ms = 0.0f,
+                       float speed = 1.0f) :
+                       animations_(std::move(animations)),
+                       current_animation_id_(current_animation_id),
+                       current_frame_index_(current_frame_index),
+                       current_time_ms_(current_time_ms),
+                       speed_(speed) {}
+
 };
 
 } // namespace engine::component

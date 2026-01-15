@@ -1,5 +1,4 @@
 #pragma once
-#include "../component/component.h" 
 #include <string_view>
 #include <memory>
 #include <unordered_map>
@@ -15,7 +14,7 @@ namespace engine::object {
 
 /**
  * @brief 游戏对象类，负责管理游戏对象的组件。
- * 
+ *
  * 该类管理游戏对象的组件，并提供添加、获取、检查和移除组件的功能。
  * 它还提供更新和渲染游戏对象的方法。
  */
@@ -46,7 +45,7 @@ public:
 
     /**
      * @brief 添加组件 (里面会完成组件的init())
-     * 
+     *
      * @tparam T 组件类型
      * @tparam Args 组件构造函数参数类型
      * @param args 组件构造函数参数
@@ -76,7 +75,7 @@ public:
 
     /**
      * @brief 获取组件
-     * 
+     *
      * @tparam T 组件类型
      * @return 组件指针
      */
@@ -94,7 +93,7 @@ public:
 
     /**
      * @brief 检查是否存在组件
-     * 
+     *
      * @tparam T 组件类型
      * @return 是否存在组件
      */
@@ -107,7 +106,7 @@ public:
 
     /**
      * @brief 移除组件
-     * 
+     *
      * @tparam T 组件类型
      */
     template <typename T>
