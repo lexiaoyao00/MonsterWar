@@ -1,5 +1,5 @@
 #pragma once
-#include "sprite.h"
+#include "image.h"
 #include "../utils/math.h"
 #include <string>
 #include <optional> // For std::optional
@@ -26,7 +26,7 @@ class Renderer final{
 private:
     SDL_Renderer* renderer_ = nullptr;                              ///< @brief 指向 SDL_Renderer 的非拥有指针
     engine::resource::ResourceManager* resource_manager_ = nullptr; ///< @brief 指向 ResourceManager 的非拥有指针
-    
+
 public:
     /**
      * @brief 构造函数
@@ -39,38 +39,27 @@ public:
 
     /**
      * @brief 绘制一个精灵
-     * 
-     * @param sprite 包含纹理ID、源矩形和翻转状态的 Sprite 对象。
+     *
+     * @param image 包含纹理ID、源矩形和翻转状态的 Image 对象。
      * @param position 世界坐标中的左上角位置。
      * @param scale 缩放因子。
      * @param angle 旋转角度（度）。
      */
-    void drawSprite(const Camera& camera, const Sprite& sprite, const glm::vec2& position, 
-                    const glm::vec2& scale = {1.0f, 1.0f}, double angle = 0.0f);
+    // void drawSprite(const Camera& camera, const Image& image, const glm::vec2& position,
+    //                 const glm::vec2& scale = {1.0f, 1.0f}, double angle = 0.0f);
 
     /**
-     * @brief 绘制视差滚动背景
-     * 
-     * @param sprite 包含纹理ID、源矩形和翻转状态的 Sprite 对象。
-     * @param position 世界坐标。
-     * @param scroll_factor 滚动因子。
-     * @param scale 缩放因子。
-     */
-    void drawParallax(const Camera& camera, const Sprite& sprite, const glm::vec2& position, 
-                      const glm::vec2& scroll_factor, glm::bvec2 repeat = {true, true}, const glm::vec2& scale = {1.0f, 1.0f});
-
-    /**
-     * @brief 在屏幕坐标中直接渲染一个用于UI的Sprite对象。
+     * @brief 在屏幕坐标中直接渲染一个用于UI的 Image 对象。
      *
-     * @param sprite 包含纹理ID、源矩形和翻转状态的Sprite对象。
+     * @param image 包含纹理ID、源矩形和翻转状态的 Image 对象。
      * @param position 屏幕坐标中的左上角位置。
-     * @param size 可选：目标矩形的大小。如果为 std::nullopt，则使用Sprite的原始大小。
+     * @param size 可选：目标矩形的大小。如果为 std::nullopt，则使用 Image 的原始大小。
      */
-    void drawUISprite(const Sprite& sprite, const glm::vec2& position, const std::optional<glm::vec2>& size = std::nullopt);
+    void drawUIImage(const Image& image, const glm::vec2& position, const std::optional<glm::vec2>& size = std::nullopt);
 
     /**
      * @brief 绘制填充矩形
-     * 
+     *
      * @param rect 矩形区域
      * @param color 填充颜色
      */
@@ -91,7 +80,7 @@ public:
     Renderer& operator=(Renderer&&) = delete;
 
 private:
-    std::optional<SDL_FRect> getSpriteSrcRect(const Sprite& sprite);     ///< @brief 获取精灵的源矩形，用于具体绘制。出现错误则返回std::nullopt并跳过绘制
+    std::optional<SDL_FRect> getImageSrcRect(const Image& image);     ///< @brief 获取精灵的源矩形，用于具体绘制。出现错误则返回std::nullopt并跳过绘制
     bool isRectInViewport(const Camera& camera, const SDL_FRect& rect);  ///< @brief 判断矩形是否在视口中，用于视口裁剪
 
 };

@@ -12,7 +12,7 @@
 #include "../scene/scene.h"
 #include "../core/context.h"
 #include "../resource/resource_manager.h"
-#include "../render/sprite.h"
+#include "../render/image.h"
 #include "../render/animation.h"
 #include "../utils/math.h"
 #include <nlohmann/json.hpp>
@@ -501,7 +501,7 @@ engine::component::TileInfo LevelLoader::getTileInfoByGid(int gid)
             static_cast<float>(tile_size_.x),
             static_cast<float>(tile_size_.y)
         };
-        engine::render::Sprite sprite{texture_id, texture_rect};
+        engine::render::Image sprite{texture_id, texture_rect};
         auto tile_type = getTileTypeById(tileset, local_id);   // 获取瓦片类型（只有瓦片id，还没找具体瓦片json）
         return engine::component::TileInfo(sprite, tile_type);
     } else {   // 这是多图片的情况
@@ -531,7 +531,7 @@ engine::component::TileInfo LevelLoader::getTileInfoByGid(int gid)
                     static_cast<float>(tile_json.value("width", image_width)),    // 如果未设置，则使用图片尺寸
                     static_cast<float>(tile_json.value("height", image_height))
                 };
-                engine::render::Sprite sprite{texture_id, texture_rect};
+                engine::render::Image sprite{texture_id, texture_rect};
                 auto tile_type = getTileType(tile_json);    // 获取瓦片类型（已经有具体瓦片json了）
                 return engine::component::TileInfo(sprite, tile_type);
             }

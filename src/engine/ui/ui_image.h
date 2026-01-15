@@ -1,6 +1,6 @@
 #pragma once
 #include "ui_element.h"
-#include "../render/sprite.h"
+#include "../render/image.h"
 #include <string>
 #include <string_view>
 #include <optional>
@@ -15,7 +15,7 @@ namespace engine::ui {
  */
 class UIImage final : public UIElement {
 protected:
-    engine::render::Sprite sprite_;
+    engine::render::Image image_;
 
 public:
     /**
@@ -56,7 +56,7 @@ public:
      * @param position 图像的局部位置。
      * @param size 图像元素的大小。（如果为{0,0}，则使用纹理的原始尺寸）
      */
-    UIImage(engine::render::Sprite& sprite,
+    UIImage(engine::render::Image& sprite,
         glm::vec2 position = {0.0f, 0.0f},
         glm::vec2 size = {0.0f, 0.0f});
 
@@ -64,18 +64,18 @@ public:
     void render(engine::core::Context& context) override;
 
     // --- Setters & Getters ---
-    const engine::render::Sprite& getSprite() const { return sprite_; }
-    void setSprite(engine::render::Sprite sprite) { sprite_ = std::move(sprite); }
+    const engine::render::Image& getSprite() const { return image_; }
+    void setImage(engine::render::Image sprite) { image_ = std::move(sprite); }
 
-    std::string_view getTexturePath() const { return sprite_.getTexturePath(); }
-    entt::id_type getTextureId() const { return sprite_.getTextureId(); }
-    void setTexture(std::string_view texture_path) { sprite_.setTexture(texture_path); }
+    std::string_view getTexturePath() const { return image_.getTexturePath(); }
+    entt::id_type getTextureId() const { return image_.getTextureId(); }
+    void setTexture(std::string_view texture_path) { image_.setTexture(texture_path); }
 
-    const std::optional<engine::utils::Rect>& getSourceRect() const { return sprite_.getSourceRect(); }
-    void setSourceRect(std::optional<engine::utils::Rect> source_rect) { sprite_.setSourceRect(std::move(source_rect)); }
+    const std::optional<engine::utils::Rect>& getSourceRect() const { return image_.getSourceRect(); }
+    void setSourceRect(std::optional<engine::utils::Rect> source_rect) { image_.setSourceRect(std::move(source_rect)); }
 
-    bool isFlipped() const { return sprite_.isFlipped(); }
-    void setFlipped(bool flipped) { sprite_.setFlipped(flipped); }
+    bool isFlipped() const { return image_.isFlipped(); }
+    void setFlipped(bool flipped) { image_.setFlipped(flipped); }
 };
 
 } // namespace engine::ui

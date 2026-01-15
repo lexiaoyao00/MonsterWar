@@ -1,11 +1,11 @@
 #pragma once
-#include "../render/sprite.h"
+#include "../render/image.h"
 #include "component.h"
 #include <vector>
 #include <glm/vec2.hpp>
 
 namespace engine::render {
-class Sprite;
+class Image;
 }
 
 namespace engine::core {
@@ -36,9 +36,9 @@ enum class TileType {
  * @brief 包含单个瓦片的渲染和逻辑信息。
  */
 struct TileInfo {
-    render::Sprite sprite;      ///< @brief 瓦片的视觉表示
+    render::Image sprite;      ///< @brief 瓦片的视觉表示
     TileType type;              ///< @brief 瓦片的逻辑类型
-    TileInfo(render::Sprite s = render::Sprite(), TileType t = TileType::EMPTY) : sprite(std::move(s)), type(t) {}
+    TileInfo(render::Image s = render::Image(), TileType t = TileType::EMPTY) : sprite(std::move(s)), type(t) {}
 };
 
 /**
