@@ -11,13 +11,13 @@
 namespace engine::core {
 
 Context::Context(entt::dispatcher& dispatcher,
-                 engine::input::InputManager& input_manager,
+                 engine::input::InputManager& input_manager, 
                  engine::render::Renderer& renderer,
                  engine::render::Camera& camera,
                  engine::render::TextRenderer& text_renderer,
                  engine::resource::ResourceManager& resource_manager,
                  engine::audio::AudioPlayer& audio_player,
-                 engine::core::GameState& game_state)
+                 engine::core::GameState& game_state)     
     : dispatcher_(dispatcher),
       input_manager_(input_manager),
       renderer_(renderer),
@@ -30,4 +30,4 @@ Context::Context(entt::dispatcher& dispatcher,
     spdlog::trace("上下文已创建并初始化。");
 }
 
-} // namespace engine::core
+} // namespace engine::core 

@@ -72,8 +72,8 @@ public:
 
     /**
      * @brief 注册用于设置初始游戏场景的函数。
-     *        这个函数将在 Context 初始化后被调用。
-     * @param func 一个接收 Context 引用的函数对象。
+     *        这个函数将在 SceneManager 初始化后被调用。
+     * @param func 一个接收 SceneManager 引用的函数对象。
      */
     void registerSceneSetup(std::function<void(engine::core::Context&)> func);
 
@@ -94,6 +94,7 @@ private:
     [[nodiscard]] bool initDispatcher();
     [[nodiscard]] bool initConfig();
     [[nodiscard]] bool initSDL();
+    [[nodiscard]] bool initGameState();
     [[nodiscard]] bool initTime();
     [[nodiscard]] bool initResourceManager();
     [[nodiscard]] bool initAudioPlayer();
@@ -101,7 +102,6 @@ private:
     [[nodiscard]] bool initTextRenderer();
     [[nodiscard]] bool initCamera();
     [[nodiscard]] bool initInputManager();
-    [[nodiscard]] bool initGameState();
     [[nodiscard]] bool initContext();
     [[nodiscard]] bool initSceneManager();
 

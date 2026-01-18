@@ -10,18 +10,18 @@
 namespace engine::render {
 
 /**
- * @brief 表示要绘制的视觉精灵的数据。
+ * @brief 表示要绘制的UI图片的数据。（只针对UI，与游戏中Sprite隔离）
  *
  * 包含纹理标识符、要绘制的纹理部分（源矩形）以及翻转状态。
- * 位置、缩放和旋转由外部（例如 SpriteComponent）标识。
- * 渲染工作由 Renderer 类完成。（传入Sprite作为参数）
+ * 位置、缩放和旋转由外部（例如 UIImage）标识。
+ * 渲染工作由 Renderer 类完成。（传入Image作为参数）
  */
 class Image final{
 private:
     std::string texture_path_;                          ///< @brief 纹理资源的文件路径
     entt::id_type texture_id_{entt::null};              ///< @brief 纹理资源的标识符 (entt::null是推荐的初始化方式，表示无效的ID)
     std::optional<engine::utils::Rect> source_rect_;    ///< @brief 可选：要绘制的纹理部分
-    bool is_flipped_ = false;                           ///< @brief 是否水平翻转
+    bool is_flipped_{false};                            ///< @brief 是否水平翻转
 
 public:
     /**

@@ -1,16 +1,16 @@
 #include "resource_manager.h"
 #include "texture_manager.h"
 #include "audio_manager.h"
-#include "font_manager.h"
+#include "font_manager.h" 
 #include <fstream>
 #include <filesystem>
 #include <SDL3_mixer/SDL_mixer.h>
-#include <SDL3_ttf/SDL_ttf.h>
+#include <SDL3_ttf/SDL_ttf.h> 
 #include <glm/glm.hpp>
 #include <spdlog/spdlog.h>
 #include <nlohmann/json.hpp>
 #include <entt/core/hashed_string.hpp>
-
+ 
 namespace engine::resource {
 
 ResourceManager::~ResourceManager() = default;
@@ -32,18 +32,16 @@ void ResourceManager::clear() {
     spdlog::trace("ResourceManager 中的资源通过 clear() 清空。");
 }
 
-void ResourceManager::loadResources(std::string_view file_path)
-{
+void ResourceManager::loadResources(std::string_view file_path) {
     std::filesystem::path path(file_path);
     if (!std::filesystem::exists(path)) {
-        spdlog::warn("资源映射文件不存在: {}", path.string());
+        spdlog::warn("资源映射文件不存在: {}", file_path);
         return;
     }
     std::ifstream file(path);
     nlohmann::json json;
     file >> json;
-    try
-    {
+    try {
         if (json.contains("sound")) {
             for (const auto& [key, value] : json["sound"].items()) {
                 loadSound(entt::hashed_string(key.c_str()), value.get<std::string>());
@@ -63,13 +61,10 @@ void ResourceManager::loadResources(std::string_view file_path)
             for (const auto& [key, value] : json["font"].items()) {
                 loadFont(entt::hashed_string(key.c_str()), value.get<int>(), value.get<std::string>());
             }
-        }
+        }   
+    } catch (const nlohmann::json::exception& e) {
+        spdlog::error("加载资源文件失败: {}", e.what());
     }
-    catch(const std::exception& e)
-    {
-        spdlog::error("加载资源时发生错误: {}", e.what());
-    }
-
 }
 
 // --- 纹理接口实现 ---

@@ -69,7 +69,7 @@ TTF_Font* FontManager::getFont(entt::id_type id, int point_size, std::string_vie
     }
 
     spdlog::info("字体 '{}' (id = {}, {}pt) 不在缓存中，尝试加载。", file_path.data(), id, point_size);
-    return loadFont(id, point_size, file_path);
+    return loadFont(id, point_size, file_path); 
 }
 
 TTF_Font* FontManager::getFont(entt::hashed_string str_hs, int point_size) {

@@ -1,6 +1,6 @@
 #include "audio_player.h"
 #include "../resource/resource_manager.h"
-#include <SDL3_mixer/SDL_mixer.h>
+#include <SDL3_mixer/SDL_mixer.h> 
 #include <spdlog/spdlog.h>
 #include <glm/common.hpp>
 #include <entt/core/hashed_string.hpp>
@@ -37,7 +37,7 @@ int AudioPlayer::playSound(entt::hashed_string hashed_path, int channel) {
     if (!chunk) {
         spdlog::error("AudioPlayer: 无法获取音效 id: {}, path: {} 播放。", hashed_path.value(), hashed_path.data());
         return -1;
-    }
+    }   
 
     int played_channel = Mix_PlayChannel(channel, chunk, 0);    // 播放音效
     if (played_channel == -1) {

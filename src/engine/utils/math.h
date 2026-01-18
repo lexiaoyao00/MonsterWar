@@ -1,16 +1,15 @@
 #pragma once
-#include <glm/glm.hpp>
+#include <glm/vec2.hpp>
 
 namespace engine::utils {
 
 /**
- * @brief 自定义矩形结构体，包含位置和大小
- *
+ * @brief 自定义矩形结构体，包含位置和大小。
  */
 struct Rect
 {
-    glm::vec2 position;
-    glm::vec2 size;
+    glm::vec2 position{};
+    glm::vec2 size{};
 
     Rect() = default;
     Rect(glm::vec2 position, glm::vec2 size) : position(position), size(size) {}
@@ -18,8 +17,7 @@ struct Rect
 };
 
 /**
- * @brief 自定义颜色结构体，包含RGBA四个分量
- *
+ * @brief 自定义颜色结构体。
  */
 struct FColor
 {

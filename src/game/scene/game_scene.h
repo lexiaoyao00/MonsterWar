@@ -1,13 +1,11 @@
 #pragma once
-
 #include "../../engine/scene/scene.h"
 #include "../../engine/system/fwd.h"
 #include <memory>
 
-
 namespace game::scene {
 
-class GameScene : public engine::scene::Scene {
+class GameScene final: public engine::scene::Scene {
 private:
     std::unique_ptr<engine::system::RenderSystem> render_system_;
     std::unique_ptr<engine::system::MovementSystem> movement_system_;
@@ -23,10 +21,8 @@ public:
     void clean() override;
 
 private:
-    // --- 测试资源管理器 ---
-    void testResourceManager();
-    // 测试 ECS
-    void testECS();
+    [[nodiscard]] bool loadLevel();
+
 };
 
-}   // namespace game::scene
+} // namespace game::scene

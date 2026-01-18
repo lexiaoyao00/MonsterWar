@@ -32,47 +32,45 @@ void Scene::update(float delta_time) {
 }
 
 void Scene::render() {
-    if (!is_initialized_) return;
+     if (!is_initialized_) return;
 
     // 渲染UI管理器
     ui_manager_->render(context_);
 }
 
 void Scene::handleInput() {
-    if (!is_initialized_) return;
+     if (!is_initialized_) return;
 
     // 处理UI管理器输入
     if (ui_manager_->handleInput(context_)) return;   // 如果输入事件被UI处理则返回，不再处理游戏对象输入
-
 }
 
 void Scene::clean() {
     if (!is_initialized_) return;
 
+    registry_.clear();
     is_initialized_ = false;        // 清理完成后，设置场景为未初始化
     spdlog::trace("场景 '{}' 清理完成。", scene_name_);
 }
-
 
 void Scene::requestPopScene()
 {
     context_.getDispatcher().trigger<engine::utils::PopSceneEvent>();
 }
 
-void Scene::requestPushScene(std::unique_ptr<Scene> &&new_scene)
+void Scene::requestPushScene(std::unique_ptr<engine::scene::Scene>&& scene)
 {
-    context_.getDispatcher().trigger<engine::utils::PushSceneEvent>(engine::utils::PushSceneEvent(std::move(new_scene)));
+    context_.getDispatcher().trigger<engine::utils::PushSceneEvent>(engine::utils::PushSceneEvent{std::move(scene)});
 }
 
-void Scene::requestReplaceScene(std::unique_ptr<Scene> &&new_scene)
+void Scene::requestReplaceScene(std::unique_ptr<engine::scene::Scene>&& scene)
 {
-    context_.getDispatcher().trigger<engine::utils::ReplaceSceneEvent>(engine::utils::ReplaceSceneEvent(std::move(new_scene)));
+    context_.getDispatcher().trigger<engine::utils::ReplaceSceneEvent>(engine::utils::ReplaceSceneEvent{std::move(scene)});
 }
 
 void Scene::quit()
 {
     context_.getDispatcher().trigger<engine::utils::QuitEvent>();
 }
-
 
 } // namespace engine::scene

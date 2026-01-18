@@ -1,5 +1,4 @@
 #pragma once
-#include <vector>
 #include <memory>
 #include <string>
 #include <string_view>
@@ -11,10 +10,6 @@ namespace engine::core {
 
 namespace engine::ui {
     class UIManager;
-}
-
-namespace engine::object {
-    class GameObject;
 }
 
 namespace engine::scene {
@@ -31,7 +26,7 @@ protected:
     std::string scene_name_;                            ///< @brief 场景名称
     engine::core::Context& context_;                    ///< @brief 上下文引用（隐式，构造时传入）
     std::unique_ptr<engine::ui::UIManager> ui_manager_; ///< @brief UI管理器(初始化时自动创建)
-    entt::registry registry_;                         ///< @brief ECS实体注册表
+    entt::registry registry_;                           ///< @brief ECS注册表
 
     bool is_initialized_ = false;                       ///< @brief 场景是否已初始化(非当前场景很可能未被删除，因此需要初始化标志避免重复初始化)
 
@@ -60,17 +55,16 @@ public:
     virtual void handleInput();                 ///< @brief 处理输入。
     virtual void clean();                       ///< @brief 清理场景。
 
-
-    /// @brief 请求弹出场景。
+    /// @brief 请求弹出当前场景。
     void requestPopScene();
 
-    /// @brief 请求压入一个新场景
-    void requestPushScene(std::unique_ptr<Scene>&& new_scene);
+    /// @brief 请求压入一个新场景。
+    void requestPushScene(std::unique_ptr<engine::scene::Scene>&& scene);
 
-    /// @brief 请求替换当前场景
-    void requestReplaceScene(std::unique_ptr<Scene>&& new_scene);
+    /// @brief 请求替换当前场景。
+    void requestReplaceScene(std::unique_ptr<engine::scene::Scene>&& scene);
 
-    /// @brief 退出游戏
+    /// @brief 退出游戏。
     void quit();
 
     // getters and setters
@@ -78,7 +72,7 @@ public:
     std::string_view getName() const { return scene_name_; }                  ///< @brief 获取场景名称
     void setInitialized(bool initialized) { is_initialized_ = initialized; }    ///< @brief 设置场景是否已初始化
     bool isInitialized() const { return is_initialized_; }                      ///< @brief 获取场景是否已初始化
-    entt::registry& getRegistry() { return registry_; }                       ///< @brief 获取实体注册表引用
+    entt::registry& getRegistry() { return registry_; }                      ///< @brief 获取注册表引用
 
     engine::core::Context& getContext() const { return context_; }                  ///< @brief 获取上下文引用
 

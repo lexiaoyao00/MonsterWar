@@ -35,6 +35,7 @@ void GameApp::run() {
     while (is_running_) {
         time_->update();
         float delta_time = time_->getDeltaTime();
+        
         handleEvents();
         update(delta_time);
         render();
@@ -60,6 +61,7 @@ bool GameApp::init() {
     if (!initDispatcher()) return false;
     if (!initConfig()) return false;
     if (!initSDL())  return false;
+    if (!initGameState()) return false;
     if (!initTime()) return false;
     if (!initResourceManager()) return false;
     if (!initAudioPlayer()) return false;
@@ -67,7 +69,6 @@ bool GameApp::init() {
     if (!initCamera()) return false;
     if (!initTextRenderer()) return false;
     if (!initInputManager()) return false;
-    if (!initGameState()) return false;
 
     if (!initContext()) return false;
     if (!initSceneManager()) return false;
@@ -75,7 +76,7 @@ bool GameApp::init() {
     // 调用场景设置函数 (创建第一个场景并压入栈)
     scene_setup_func_(*context_);
 
-    // 注册退出事件（回调函数可以无参数，代表不适用事件结构体中的数据）
+    // 注册退出事件 (回调函数可以无参数，代表不使用事件结构体中的数据)
     dispatcher_->sink<utils::QuitEvent>().connect<&GameApp::onQuitEvent>(this);
 
     is_running_ = true;
@@ -84,7 +85,8 @@ bool GameApp::init() {
 }
 
 void GameApp::handleEvents() {
-    input_manager_->update();   // 每帧首先更新输入管理器
+    // 处理并分发输入事件
+    input_manager_->update();
 
     scene_manager_->handleInput();
 }
@@ -134,12 +136,9 @@ void GameApp::close() {
 
 bool GameApp::initDispatcher()
 {
-    try
-    {
+    try {
         dispatcher_ = std::make_unique<entt::dispatcher>();
-    }
-    catch(const std::exception& e)
-    {
+    } catch (const std::exception& e) {
         spdlog::error("初始化事件分发器失败: {}", e.what());
         return false;
     }
@@ -166,7 +165,10 @@ bool GameApp::initSDL()
         return false;
     }
 
-    window_ = SDL_CreateWindow(config_->window_title_.c_str(), config_->window_width_, config_->window_height_, SDL_WINDOW_RESIZABLE);
+    // 设置窗口大小 (窗口大小 * 窗口缩放比例)
+    int window_width = static_cast<int>(static_cast<float>(config_->window_width_) * config_->window_scale_);
+    int window_height = static_cast<int>(static_cast<float>(config_->window_height_) * config_->window_scale_);
+    window_ = SDL_CreateWindow(config_->window_title_.c_str(), window_width, window_height, SDL_WINDOW_RESIZABLE);
     if (window_ == nullptr) {
         spdlog::error("无法创建窗口! SDL错误: {}", SDL_GetError());
         return false;
@@ -186,9 +188,22 @@ bool GameApp::initSDL()
     SDL_SetRenderVSync(sdl_renderer_, vsync_mode);
     spdlog::trace("VSync 设置为: {}", config_->vsync_enabled_ ? "Enabled" : "Disabled");
 
-    // 设置逻辑分辨率为窗口大小的一半（针对像素游戏）
-    SDL_SetRenderLogicalPresentation(sdl_renderer_, config_->window_width_ / 2, config_->window_height_ / 2, SDL_LOGICAL_PRESENTATION_LETTERBOX);
+    // 设置逻辑分辨率 (窗口大小 * 逻辑缩放比例)
+    int logical_width = static_cast<int>(static_cast<float>(config_->window_width_) * config_->window_logical_scale_);
+    int logical_height = static_cast<int>(static_cast<float>(config_->window_height_) * config_->window_logical_scale_);
+    SDL_SetRenderLogicalPresentation(sdl_renderer_, logical_width, logical_height, SDL_LOGICAL_PRESENTATION_LETTERBOX);
     spdlog::trace("SDL 初始化成功。");
+    return true;
+}
+
+bool GameApp::initGameState()
+{
+    try {
+        game_state_ = std::make_unique<engine::core::GameState>(window_, sdl_renderer_);
+    } catch (const std::exception& e) {
+        spdlog::error("初始化游戏状态失败: {}", e.what());
+        return false;
+    }
     return true;
 }
 
@@ -243,7 +258,7 @@ bool GameApp::initRenderer() {
 
 bool GameApp::initCamera() {
     try {
-        camera_ = std::make_unique<engine::render::Camera>(glm::vec2(config_->window_width_ / 2, config_->window_height_ / 2));
+        camera_ = std::make_unique<engine::render::Camera>(game_state_->getLogicalSize());
     } catch (const std::exception& e) {
         spdlog::error("初始化相机失败: {}", e.what());
         return false;
@@ -267,7 +282,7 @@ bool GameApp::initTextRenderer()
 bool GameApp::initInputManager()
 {
     try {
-        input_manager_ = std::make_unique<engine::input::InputManager>(sdl_renderer_, config_.get(),dispatcher_.get());
+        input_manager_ = std::make_unique<engine::input::InputManager>(sdl_renderer_, config_.get(), dispatcher_.get());
     } catch (const std::exception& e) {
         spdlog::error("初始化输入管理器失败: {}", e.what());
         return false;
@@ -276,26 +291,15 @@ bool GameApp::initInputManager()
     return true;
 }
 
-bool GameApp::initGameState()
-{
-    try {
-        game_state_ = std::make_unique<engine::core::GameState>(window_, sdl_renderer_);
-    } catch (const std::exception& e) {
-        spdlog::error("初始化游戏状态失败: {}", e.what());
-        return false;
-    }
-    return true;
-}
-
 bool GameApp::initContext()
 {
     try {
         context_ = std::make_unique<engine::core::Context>(*dispatcher_,
                                                            *input_manager_,
-                                                           *renderer_,
-                                                           *camera_,
+                                                           *renderer_, 
+                                                           *camera_, 
                                                            *text_renderer_,
-                                                           *resource_manager_,
+                                                           *resource_manager_, 
                                                            *audio_player_,
                                                            *game_state_);
     } catch (const std::exception& e) {

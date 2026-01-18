@@ -48,7 +48,7 @@ public:
     ResourceManager& operator=(ResourceManager&&) = delete;
 
     // 加载资源
-    void loadResources(std::string_view file_path); ///< @brief 从 JSON 文件中加载资源
+    void loadResources(std::string_view file_path);
 
     // --- 统一资源访问接口 ---
     // -- Texture --

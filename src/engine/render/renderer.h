@@ -1,19 +1,14 @@
 #pragma once
 #include "image.h"
+#include "../component/sprite_component.h"
 #include "../utils/math.h"
-#include <string>
-#include <optional> // For std::optional
+#include <optional>
 
 struct SDL_Renderer;
 struct SDL_FRect;
-struct SDL_FColor;
 
 namespace engine::resource {
     class ResourceManager;
-}
-
-namespace engine::component {
-    class Sprite;
 }
 
 namespace engine::render {
@@ -44,21 +39,21 @@ public:
     /**
      * @brief 绘制一个精灵
      *
-     * @param camera 游戏相机，用于坐标转换
-     * @param sprite 包含纹理ID，源矩形和饭庄状态的 Sprite 对象
-     * @param position 世界坐标中的左上角位置
-     * @param size 精灵大小
-     * @param rotation 旋转角度
+     * @param camera 游戏相机，用于坐标转换。
+     * @param sprite 包含纹理ID、源矩形和翻转状态的 Sprite 对象。
+     * @param position 世界坐标中的左上角位置。
+     * @param size 精灵的大小。
+     * @param rotation 旋转角度（度）。
      */
     void drawSprite(const Camera& camera, const component::Sprite& sprite, const glm::vec2& position,
                     const glm::vec2& size, const float rotation = 0.0f);
 
     /**
-     * @brief 在屏幕坐标中直接渲染一个用于UI的 Image 对象。
+     * @brief 在屏幕坐标中直接渲染一个用于UI的Image对象。
      *
-     * @param image 包含纹理ID、源矩形和翻转状态的 Image 对象。
+     * @param image 包含纹理ID、源矩形和翻转状态的Image对象。
      * @param position 屏幕坐标中的左上角位置。
-     * @param size 可选：目标矩形的大小。如果为 std::nullopt，则使用 Image 的原始大小。
+     * @param size 可选：目标矩形的大小。如果为 std::nullopt，则使用Image的原始大小。
      */
     void drawUIImage(const Image& image, const glm::vec2& position, const std::optional<glm::vec2>& size = std::nullopt);
 
@@ -85,7 +80,7 @@ public:
     Renderer& operator=(Renderer&&) = delete;
 
 private:
-    std::optional<SDL_FRect> getImageSrcRect(const Image& image);     ///< @brief 获取精灵的源矩形，用于具体绘制。出现错误则返回std::nullopt并跳过绘制
+    std::optional<SDL_FRect> getImageSrcRect(const Image& image);       ///< @brief 获取Image的源矩形，用于具体绘制。出现错误则返回std::nullopt并跳过绘制
     bool isRectInViewport(const Camera& camera, const SDL_FRect& rect);  ///< @brief 判断矩形是否在视口中，用于视口裁剪
 
 };

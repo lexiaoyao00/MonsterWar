@@ -35,7 +35,7 @@ public:
     AudioPlayer(AudioPlayer&&) = delete;
     AudioPlayer& operator=(AudioPlayer&&) = delete;
 
-    // --- 播放控制方法 ---
+    // --- 播放控制方法 --- 
     /**
      * @brief 播放音效（chunk）。
      * @note 必须确保 ResourceManager 加载了音效。

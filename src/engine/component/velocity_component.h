@@ -3,9 +3,11 @@
 
 namespace engine::component {
 
-
+/**
+ * @brief 速度组件。
+ */
 struct VelocityComponent {
-    glm::vec2 velocity_{}; // 速度
+    glm::vec2 velocity_{};      ///< @brief 速度
 };
 
 }

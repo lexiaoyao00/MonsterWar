@@ -57,7 +57,7 @@ private: // 仅供 ResourceManager 访问的方法
      * @note 如果纹理未加载，则从文件路径加载纹理，并返回加载的纹理的指针
      */
     SDL_Texture* loadTexture(entt::id_type id, std::string_view file_path);
-
+    
     /**
      * @brief 从字符串哈希值加载纹理
      * @param str_hs entt::hashed_string类型
@@ -66,7 +66,7 @@ private: // 仅供 ResourceManager 访问的方法
      * @note 如果纹理未加载，则从字符串对应的文件路径加载纹理，并返回加载的纹理的指针
      */
     SDL_Texture* loadTexture(entt::hashed_string str_hs);
-
+    
     /**
      * @brief 获取纹理
      * @param id 纹理的唯一标识符, 通过entt::hashed_string生成

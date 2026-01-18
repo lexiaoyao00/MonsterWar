@@ -44,7 +44,7 @@ private:
         }
     };
 
-    // 字体存储（FontKey -> TTF_Font）。
+    // 字体存储（FontKey -> TTF_Font）。  
     // unordered_map 的键需要能转换为哈希值，对于基础数据类型，系统会自动转换
     // 但是对于对于自定义类型（系统无法自动转化），则需要提供自定义哈希函数（第三个模版参数）
     std::unordered_map<FontKey, std::unique_ptr<TTF_Font, SDLFontDeleter>, FontKeyHash> fonts_;
@@ -55,7 +55,7 @@ public:
      * @throws std::runtime_error 如果 SDL_ttf 初始化失败。
      */
     FontManager();
-
+    
     ~FontManager();            ///< @brief 需要手动添加析构函数，清理资源并关闭 SDL_ttf。
 
     // 当前设计中，我们只需要一个FontManager，所有权不变，所以不需要拷贝、移动相关构造及赋值运算符
@@ -113,7 +113,7 @@ private: // 仅由 ResourceManager（和内部）访问的方法
      * @param point_size 字体的点大小
      */
     void unloadFont(entt::id_type id, int point_size);
-
+    
     /**
      * @brief 清空所有缓存的字体
      */

@@ -1,7 +1,7 @@
 #include "camera.h"
 #include "../utils/math.h"
-#include "../component/transform_component.h"
 #include <spdlog/spdlog.h>
+#include <glm/common.hpp>
 
 namespace engine::render {
 
@@ -18,7 +18,6 @@ void Camera::setPosition(glm::vec2 position) {
     position_ = std::move(position);
     clampPosition();
 }
-
 
 void Camera::move(const glm::vec2 &offset)
 {

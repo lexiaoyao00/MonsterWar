@@ -64,26 +64,24 @@ void SceneManager::close() {
         }
         scene_stack_.pop_back();
     }
-    // 断开事件处理函数（一次断开所有和当前实例绑定的回调函数）
+    // 断开事件处理函数 (一次断开所有和当前实例绑定的回调函数)
     context_.getDispatcher().disconnect(this);
 }
 
-void SceneManager::onPopScene()
-{
+void SceneManager::onPopScene() {
     pending_action_ = PendingAction::Pop;
 }
 
-void SceneManager::onPushScene(engine::utils::PushSceneEvent &event)
-{
+void SceneManager::onPushScene(engine::utils::PushSceneEvent& event) {
     pending_action_ = PendingAction::Push;
     pending_scene_ = std::move(event.scene);
 }
 
-void SceneManager::onReplaceScene(engine::utils::ReplaceSceneEvent &event)
-{
+void SceneManager::onReplaceScene(engine::utils::ReplaceSceneEvent& event) {
     pending_action_ = PendingAction::Replace;
     pending_scene_ = std::move(event.scene);
 }
+
 // --- Private Methods ---
 
 void SceneManager::processPendingActions()

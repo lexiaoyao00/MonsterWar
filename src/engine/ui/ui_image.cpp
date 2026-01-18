@@ -35,11 +35,11 @@ UIImage::UIImage(entt::id_type texture_id,
     spdlog::trace("UIImage 构造完成");
 }
 
-UIImage::UIImage(engine::render::Image& sprite,
+UIImage::UIImage(engine::render::Image& image,
                  glm::vec2 position,
                  glm::vec2 size)
     : UIElement(std::move(position), std::move(size)),
-      image_(sprite)
+      image_(image)
 {
     if (image_.getTextureId() == entt::null) {
         spdlog::warn("创建了一个空纹理ID的UIImage。");
