@@ -318,6 +318,17 @@ std::optional<engine::component::TileInfo> LevelLoader::getTileInfoByGid(int gid
     if (gid == 0) {
         return std::nullopt;
     }
+    // 判断并存储是否存在水平翻转(最高位的第32位为1)
+    bool is_flipped_horizontally = gid & 0x80000000;
+    /* TODO:未来添加其他翻转，目前只支持水平翻转
+        // 判断并存储是否存在垂直翻转(最高位的第31位为1)
+        bool is_flipped_vertically = gid & 0x40000000;
+        // 判断并存储是否存在对角线翻转(最高位的第30位为1)
+        bool is_flipped_diagonally = gid & 0x20000000;
+    */
+
+    // 还原gid的实际值
+    gid &= 0x1FFFFFFF;
 
     // upper_bound：查找tileset_data_中键大于 gid 的第一个元素，返回迭代器
     auto tileset_it = tileset_data_.upper_bound(gid);
@@ -345,7 +356,7 @@ std::optional<engine::component::TileInfo> LevelLoader::getTileInfoByGid(int gid
         // 计算纹理绝对路径
         auto texture_path = resolvePath(image_path, file_path);
         // 创建精灵
-        tile_info.sprite_ = engine::component::Sprite(texture_path, texture_rect);
+        tile_info.sprite_ = engine::component::Sprite(texture_path, texture_rect, is_flipped_horizontally);
         tile_info.type_ = getTileTypeById(tileset, local_id);   // 获取瓦片类型（只有瓦片id，还没找具体瓦片json）
         is_single_image = true;
     }
@@ -376,7 +387,7 @@ std::optional<engine::component::TileInfo> LevelLoader::getTileInfoByGid(int gid
                     glm::vec2(tile_json.value("x", 0.0f), tile_json.value("y", 0.0f)),
                     glm::vec2(tile_json.value("width", image_width), tile_json.value("height", image_height))
                 };
-                tile_info.sprite_ = engine::component::Sprite(texture_path, texture_rect);
+                tile_info.sprite_ = engine::component::Sprite(texture_path, texture_rect, is_flipped_horizontally);
                 scene_->getContext().getResourceManager().loadTexture(entt::hashed_string(texture_path.c_str()), texture_path);  // 确保纹理被加载
                 tile_info.type_ = getTileType(tile_json);    // 获取瓦片类型（已经有具体瓦片json了）
             }
