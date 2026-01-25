@@ -57,6 +57,11 @@ bool LevelLoader::loadLevel(std::string_view level_path, engine::scene::Scene* s
     map_path_ = level_path;
     map_size_ = glm::ivec2(json_data.value("width", 0), json_data.value("height", 0));
     tile_size_ = glm::ivec2(json_data.value("tilewidth", 0), json_data.value("tileheight", 0));
+    if (json_data.contains("backgroundcolor")) {
+        auto color_string = json_data["backgroundcolor"].get<std::string>();
+        auto color = engine::utils::parseHexColor(color_string);
+        scene_->getContext().getRenderer().setBgColorFloat(color.r, color.g, color.b, color.a);
+    }
 
     // 4. 加载 tileset 数据
     if (json_data.contains("tilesets") && json_data["tilesets"].is_array()) {
