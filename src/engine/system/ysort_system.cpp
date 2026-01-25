@@ -1,0 +1,17 @@
+#include "ysort_system.h"
+#include "../component/render_component.h"
+#include "../component/transform_component.h"
+#include <entt/entity/registry.hpp>
+
+namespace engine::system {
+void YSortSystem::update(entt::registry &registry)
+{
+    auto view = registry.view<component::RenderComponent, component::TransformComponent>();
+    for (auto entity : view) {
+        auto &render = registry.get<component::RenderComponent>(entity);
+        const auto &transform = registry.get<component::TransformComponent>(entity);
+        render.depth = transform.position_.y;
+    }
+}
+
+}   // namespace engine::system

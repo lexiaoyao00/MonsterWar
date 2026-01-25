@@ -3,11 +3,19 @@
 #include "../render/camera.h"
 #include "../component/transform_component.h"
 #include "../component/sprite_component.h"
+#include "../component/render_component.h"
 
 namespace engine::system {
 
 void RenderSystem::update(entt::registry& registry, render::Renderer& renderer, const render::Camera& camera) {
-    auto view = registry.view<component::TransformComponent, component::SpriteComponent>();
+
+    // 对 RenderComponent 进行排序
+    registry.sort<component::RenderComponent>([](const auto& lhs, const auto& rhs) {
+        return lhs < rhs;
+    });
+
+    // 执行渲染，注意排序组件 RenderComponent 必须放在前面
+    auto view = registry.view<component::RenderComponent, component::TransformComponent, component::SpriteComponent>();
     for (auto entity : view) {
         const auto& transform = view.get<component::TransformComponent>(entity);
         const auto& sprite = view.get<component::SpriteComponent>(entity);
