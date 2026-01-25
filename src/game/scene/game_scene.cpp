@@ -5,6 +5,14 @@
 #include "../../engine/system/animation_system.h"
 #include "../../engine/system/ysort_system.h"
 #include "../../engine/loader/level_loader.h"
+#include "../../engine/component/transform_component.h"
+#include "../../engine/component/velocity_component.h"
+#include "../../engine/component/sprite_component.h"
+#include "../../engine/component/render_component.h"
+#include "../loader/entity_builder_mw.h"
+#include "../system/followpath_system.h"
+#include "../system/remove_dead_system.h"
+#include "../component/enemy_component.h"
 #include <entt/core/hashed_string.hpp>
 #include <entt/signal/sigh.hpp>
 #include <spdlog/spdlog.h>
@@ -22,6 +30,9 @@ GameScene::GameScene(engine::core::Context& context)
     animation_system_ = std::make_unique<engine::system::AnimationSystem>();
     ysort_system_ = std::make_unique<engine::system::YSortSystem>();
 
+    follow_path_system_ = std::make_unique<game::system::FollowPathSystem>();
+    remove_dead_system_ = std::make_unique<game::system::RemoveDeadSystem>();
+
     spdlog::info("GameScene 构造完成");
 }
 
@@ -33,11 +44,25 @@ void GameScene::init() {
         spdlog::error("加载关卡失败");
         return;
     }
+    if (!initEventConnections()) {
+        spdlog::error("初始化事件连接失败");
+        return;
+    }
+
+    createTestEnemy();
 
     Scene::init();
 }
 
 void GameScene::update(float delta_time) {
+    auto& dispatcher = context_.getDispatcher();
+
+
+    // 每一帧最先清理死亡的实体（要在 dispatcher 处理完事件后再清理，所以放在下一帧的开头）
+    remove_dead_system_->update(registry_);
+
+    // 注意系统更新顺序
+    follow_path_system_->update(registry_, dispatcher, waypoint_nodes_);
     movement_system_->update(registry_, delta_time);
     animation_system_->update(registry_, delta_time);
     ysort_system_->update(registry_);   // 调用顺序要在 MovementSystem 之后
@@ -53,17 +78,60 @@ void GameScene::render() {
 
 void GameScene::clean() {
 
+    auto& dispatcher = context_.getDispatcher();
+    dispatcher.disconnect(this);
+
+    // 清理系统
     Scene::clean();
 }
 
 bool GameScene::loadLevel() {
     engine::loader::LevelLoader level_loader;
-    // 不调用setEntityBuilder，则使用默认的BasicEntityBuilder
+    // 设置拓展的构建器 EntityBuilderMW
+    level_loader.setEntityBuilder(std::make_unique<game::loader::EntityBuilderMW>(
+        level_loader,
+        context_,
+        registry_,
+        waypoint_nodes_,
+        start_points_
+    ));
     if (!level_loader.loadLevel("assets/maps/level1.tmj", this)) {
         spdlog::error("加载关卡失败");
         return false;
     }
     return true;
+}
+
+bool GameScene::initEventConnections()
+{
+    auto& dispatcher = context_.getDispatcher();
+    dispatcher.sink<game::defs::EnemyArriveHomeEvent>().connect<&GameScene::onEnemyArriveHome>(this);
+    return true;
+}
+
+void GameScene::onEnemyArriveHome(const game::defs::EnemyArriveHomeEvent&)
+{
+    spdlog::info("敌人到达基地了");
+    // TODO: 处理敌人到达家的事件
+}
+
+void GameScene::createTestEnemy()
+{
+    // 每个起点创建一个敌人
+    for (auto start_index : start_points_) {
+        auto position = waypoint_nodes_[start_index].position_;
+
+        auto enemy = registry_.create();
+        registry_.emplace<engine::component::TransformComponent>(enemy, position);
+        registry_.emplace<engine::component::VelocityComponent>(enemy, glm::vec2(0, 0));
+        registry_.emplace<game::component::EnemyComponent>(enemy, start_index, 100.0f);
+
+        auto sprite = engine::component::Sprite("assets/textures/Enemy/wolf.png",engine::utils::Rect{0, 0, 192, 192});
+        // 设置精灵组件时，需设置偏移量以调整中心点位置（否则会默认以左上角为中心点）
+        registry_.emplace<engine::component::SpriteComponent>(enemy, std::move(sprite), glm::vec2(192, 192), glm::vec2(-96, -128));
+        // 暂定主战斗图层编号为10
+        registry_.emplace<engine::component::RenderComponent>(enemy, 10);
+    }
 }
 
 } // namespace game::scene
