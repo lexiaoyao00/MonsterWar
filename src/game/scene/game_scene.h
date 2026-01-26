@@ -8,6 +8,11 @@
 #include <unordered_map>
 #include <vector>
 
+namespace game::factory {
+    class BlueprintManager;
+    class EntityFactory;
+}
+
 namespace game::scene {
 
 class GameScene final: public engine::scene::Scene {
@@ -23,6 +28,11 @@ private:
     std::unordered_map<int, game::data::WaypointNode> waypoint_nodes_;  // 路径节点ID到节点数据的映射
     std::vector<int> start_points_;  // 起始节点ID的列表
 
+    std::unique_ptr<game::factory::EntityFactory> entity_factory_;
+
+    // 管理数据的实例很有可能同时被多个场景使用，因此使用共享指针
+    std::shared_ptr<game::factory::BlueprintManager> blueprint_manager_;
+
 public:
     GameScene(engine::core::Context& context);
     ~GameScene();
@@ -35,6 +45,7 @@ public:
 private:
     [[nodiscard]] bool loadLevel();
     [[nodiscard]] bool initEventConnections();
+    [[nodiscard]] bool initEntityFactory();
 
 
     // 事件回调函数

@@ -88,5 +88,17 @@ inline int randomInt(int min, int max) {
     return distribution(generator);
 }
 
+/**
+ * @brief 根据等级和稀有度修改属性值
+ *
+ * @param base 基础属性
+ * @param level 等级
+ * @param rarity 稀有度
+ * @return float 修改后的属性
+ */
+inline float statModify(float base, int level = 1, int rarity = 1) {
+    return base * (0.95f + 0.05f * level) * (0.9f + 0.1f * rarity);
+    // TODO:未来可以改成数据驱动方便调整
+}
 
 } // namespace engine::utils
