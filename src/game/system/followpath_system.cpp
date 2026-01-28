@@ -3,6 +3,7 @@
 #include "../../engine/component/velocity_component.h"
 #include "../../engine/utils/math.h"
 #include "../component/enemy_component.h"
+#include "../component/blocked_by_component.h"
 #include "../defs/events.h"
 #include "../defs/tags.h"
 #include <glm/glm.hpp>
@@ -14,10 +15,10 @@ namespace game::system {
 void FollowPathSystem::update(entt::registry &registry, entt::dispatcher &dispatcher, std::unordered_map<int, game::data::WaypointNode> &waypoint_nodes)
 {
     spdlog::trace("FollowPathSystem::update");
-    // 筛选依据: 速度组件，变换组件，敌人组件
+    // 筛选依据: 速度组件，变换组件，敌人组件, 排除"被阻挡"的敌人
     auto view = registry.view<engine::component::VelocityComponent,
         engine::component::TransformComponent,
-        game::component::EnemyComponent>();
+        game::component::EnemyComponent>(entt::exclude<game::component::BlockedByComponent>);
 
     for (auto entity : view) {
         auto& velocity = view.get<engine::component::VelocityComponent>(entity);

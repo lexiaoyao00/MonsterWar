@@ -24,6 +24,7 @@ private:
 
     std::unique_ptr<game::system::FollowPathSystem> follow_path_system_;
     std::unique_ptr<game::system::RemoveDeadSystem> remove_dead_system_;
+    std::unique_ptr<game::system::BlockSystem> block_system_;
 
     std::unordered_map<int, game::data::WaypointNode> waypoint_nodes_;  // 路径节点ID到节点数据的映射
     std::vector<int> start_points_;  // 起始节点ID的列表
@@ -45,6 +46,7 @@ public:
 private:
     [[nodiscard]] bool loadLevel();
     [[nodiscard]] bool initEventConnections();
+    [[nodiscard]] bool initInputConnections();
     [[nodiscard]] bool initEntityFactory();
 
 
@@ -53,6 +55,9 @@ private:
 
     // 测试函数
     void createTestEnemy();
+    bool onCreateTextPlayerMelee();
+    bool onCreateTextPlayerRanged();
+    bool onClearAllPlayers();
 
 };
 

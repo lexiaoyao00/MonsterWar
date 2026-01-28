@@ -101,4 +101,15 @@ inline float statModify(float base, int level = 1, int rarity = 1) {
     // TODO:未来可以改成数据驱动方便调整
 }
 
+/**
+ * @brief 计算两个点之间的距离的平方（避免平方运算）
+ *
+ * @param a 点A
+ * @param b 点B
+ * @return float 距离的平方
+ */
+inline float distanceSquared(const glm::vec2& a, const glm::vec2& b) {
+    return (a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y);
+}
+
 } // namespace engine::utils

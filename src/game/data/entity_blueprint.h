@@ -1,5 +1,6 @@
 #pragma once
 #include "../../engine/utils/math.h"
+#include "../defs/constants.h"
 #include <string>
 #include <vector>
 #include <unordered_map>
@@ -52,6 +53,18 @@ struct SoundBlueprint {
 };
 
 /**
+ * @brief 玩家蓝图，用于创建玩家组件、放置类型、阻拦数量等
+ *
+ */
+struct PlayerBlueprint {
+    game::defs::PlayerType type_{game::defs::PlayerType::UNKOWN};
+    entt::id_type skill_id_{entt::null};
+    bool healer_{false};
+    int block_{0};
+    int cost_{0};
+};
+
+/**
  * @brief 敌人蓝图，用于创建敌人组件
  *
  */
@@ -67,6 +80,22 @@ struct DisplayInfoBlueprint {
     std::string name_;
     std::string description_;
 };
+
+/**
+ * @brief 玩家职业蓝图，包含所有必要的子蓝图，用于创建玩家实体中的所有组件
+ *
+ */
+struct PlayerClassBlueprint {
+    entt::id_type class_id_{entt::null};
+    std::string class_name_;
+    StatsBlueprint stats_{};
+    PlayerBlueprint player_{};
+    SoundBlueprint sounds_{};
+    SpriteBlueprint sprite_{};
+    DisplayInfoBlueprint display_info_{};
+    std::unordered_map<entt::id_type, AnimationBlueprint> animations_;
+};
+
 /**
  * @brief 敌人类型蓝图，包含所有必要的子蓝图，用于创建敌人实体中的所有组件
  *

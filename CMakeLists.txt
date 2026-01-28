@@ -350,6 +350,7 @@ set(SOURCES
     src/game/loader/entity_builder_mw.cpp
     src/game/system/followpath_system.cpp
     src/game/system/remove_dead_system.cpp
+    src/game/system/block_system.cpp
     src/game/factory/blueprint_manager.cpp
     src/game/factory/entity_factory.cpp
 )

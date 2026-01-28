@@ -1,6 +1,7 @@
 #include "blueprint_manager.h"
 #include "../../engine/utils/math.h"
 #include "../../engine/resource/resource_manager.h"
+#include "../defs/constants.h"
 #include <fstream>
 #include <nlohmann/json.hpp>
 #include <entt/core/hashed_string.hpp>
@@ -48,6 +49,42 @@ bool BlueprintManager::loadEnemyClassBlueprint(std::string_view enemy_json_path)
 
     return true;
 }
+bool BlueprintManager::loadPlayerClassBlueprint(std::string_view player_json_path)
+{
+    auto path = std::filesystem::path(player_json_path);
+    std::ifstream file(path);
+    nlohmann::json json;
+    file >> json;
+    file.close();
+
+    // 解析蓝图
+    try {
+        for (auto& [class_name, data_json] : json.items()){
+            entt::id_type class_id = entt::hashed_string(class_name.c_str());
+            data::StatsBlueprint stats = parseStats(data_json);
+            data::SpriteBlueprint sprite = parseSprite(data_json);
+            std::unordered_map<entt::id_type, data::AnimationBlueprint> animations = parseAnimationsMap(data_json);
+            data::SoundBlueprint sounds = parseSound(data_json);
+            data::PlayerBlueprint player = parsePlayer(data_json);
+            data::DisplayInfoBlueprint display_info = parseDisplayInfo(data_json);
+            player_class_blueprints_.emplace(class_id, data::PlayerClassBlueprint{
+                class_id,
+                class_name,
+                std::move(stats),
+                std::move(player),
+                std::move(sounds),
+                std::move(sprite),
+                std::move(display_info),
+                std::move(animations)
+            });
+        }
+    } catch (const std::exception& e) {
+        spdlog::error("加载玩家单位数据时出错: {}", e.what());
+        return false;
+    }
+
+    return true;
+}
 const data::EnemyClassBlueprint &BlueprintManager::getEnemyClassBlueprint(entt::id_type id) const
 {
     if (auto it = enemy_class_blueprints_.find(id); it != enemy_class_blueprints_.end()) {
@@ -55,6 +92,15 @@ const data::EnemyClassBlueprint &BlueprintManager::getEnemyClassBlueprint(entt::
     }
     spdlog::error("找不到敌人单位蓝图: {}", id);
     return enemy_class_blueprints_.begin()->second;
+}
+
+const data::PlayerClassBlueprint &BlueprintManager::getPlayerClassBlueprint(entt::id_type id) const
+{
+    if (auto it = player_class_blueprints_.find(id); it != player_class_blueprints_.end()) {
+        return it->second;
+    }
+    spdlog::error("找不到玩家单位蓝图: {}", id);
+    return player_class_blueprints_.begin()->second;
 }
 
 data::StatsBlueprint BlueprintManager::parseStats(const nlohmann::json &json)
@@ -85,7 +131,7 @@ data::SpriteBlueprint BlueprintManager::parseSprite(const nlohmann::json &json)
 }
 std::unordered_map<entt::id_type, data::AnimationBlueprint> BlueprintManager::parseAnimationsMap(const nlohmann::json &json)
 {
-     std::unordered_map<entt::id_type, data::AnimationBlueprint> animations;
+    std::unordered_map<entt::id_type, data::AnimationBlueprint> animations;
     for (auto& [anim_name, anim_data] : json["animation"].items()) {
         auto anim_name_id = entt::hashed_string(anim_name.c_str());
         std::vector<int> frames = anim_data["frames"].get<std::vector<int>>();
@@ -120,6 +166,32 @@ data::EnemyBlueprint BlueprintManager::parseEnemy(const nlohmann::json &json)
         json["ranged"].get<bool>(),
         json["speed"].get<float>(),
     };
+}
+data::PlayerBlueprint BlueprintManager::parsePlayer(const nlohmann::json &json)
+{
+    // 解析类型
+    auto type_str = json["type"].get<std::string>();
+    auto type = type_str == "melee" ? defs::PlayerType::MELEE :
+                type_str == "ranged" ? defs::PlayerType::RANGED :
+                type_str == "mixed" ? defs::PlayerType::MIXED :
+                defs::PlayerType::UNKOWN;
+
+    // 解析技能
+    entt::id_type skill_id = entt::null;
+
+    if (json.contains("skill")) {
+        skill_id = entt::hashed_string(json["skill"].get<std::string>().c_str());
+    }
+
+    data::PlayerBlueprint player{
+        type,
+        skill_id,
+        json["healer"].get<bool>(),
+        json["block"].get<int>(),
+        json["cost"].get<int>()
+    };
+
+    return player;
 }
 data::DisplayInfoBlueprint BlueprintManager::parseDisplayInfo(const nlohmann::json &json)
 {

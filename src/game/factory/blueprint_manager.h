@@ -20,14 +20,17 @@ class BlueprintManager {
 private:
     engine::resource::ResourceManager& resource_manager_;
     std::unordered_map<entt::id_type, data::EnemyClassBlueprint> enemy_class_blueprints_;       // 敌人类型蓝图
+    std::unordered_map<entt::id_type, data::PlayerClassBlueprint> player_class_blueprints_;   // 玩家职业蓝图
     // TODO:后面可以添加其他蓝图容器
 
 public:
     BlueprintManager(engine::resource::ResourceManager& resource_manager);
 
     [[nodiscard]] bool loadEnemyClassBlueprint(std::string_view enemy_json_path);   // 加载敌人类型蓝图
+    [[nodiscard]] bool loadPlayerClassBlueprint(std::string_view player_json_path); // 加载玩家职业蓝图
 
     const data::EnemyClassBlueprint& getEnemyClassBlueprint(entt::id_type id) const;    // 获取敌人类型蓝图
+    const data::PlayerClassBlueprint& getPlayerClassBlueprint(entt::id_type id) const; // 获取玩家职业蓝图
 
 private:
     // 分别针对各个子蓝图进行json解析，并创建（返回）对应的蓝图结构
@@ -36,6 +39,7 @@ private:
     std::unordered_map<entt::id_type, data::AnimationBlueprint> parseAnimationsMap(const nlohmann::json& json);
     data::SoundBlueprint parseSound(const nlohmann::json& json);
     data::EnemyBlueprint parseEnemy(const nlohmann::json& json);
+    data::PlayerBlueprint parsePlayer(const nlohmann::json& json);
     data::DisplayInfoBlueprint parseDisplayInfo(const nlohmann::json& json);
 };
 
