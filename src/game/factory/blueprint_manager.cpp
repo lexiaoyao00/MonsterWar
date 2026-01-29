@@ -99,7 +99,7 @@ const data::PlayerClassBlueprint &BlueprintManager::getPlayerClassBlueprint(entt
     if (auto it = player_class_blueprints_.find(id); it != player_class_blueprints_.end()) {
         return it->second;
     }
-    spdlog::error("找不到玩家单位蓝图: {}", id);
+    spdlog::error("找不到玩家单位蓝图: {}", entt::to_integral(id));
     return player_class_blueprints_.begin()->second;
 }
 

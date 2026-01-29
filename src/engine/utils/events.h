@@ -24,4 +24,9 @@ struct PlayAnimationEvent {  // 播放动画事件
 
 };
 
+struct AnimationFinishedEvent {  // 动画播放完毕事件
+    entt::entity entity_{entt::null};       // 目标实体
+    entt::id_type animation_id_{entt::null}; // 动画id
+};
+
 } // namespace engine::utils

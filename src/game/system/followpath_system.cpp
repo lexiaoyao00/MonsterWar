@@ -15,10 +15,10 @@ namespace game::system {
 void FollowPathSystem::update(entt::registry &registry, entt::dispatcher &dispatcher, std::unordered_map<int, game::data::WaypointNode> &waypoint_nodes)
 {
     spdlog::trace("FollowPathSystem::update");
-    // 筛选依据: 速度组件，变换组件，敌人组件, 排除"被阻挡"的敌人
+    // 筛选依据: 速度组件，变换组件，敌人组件, 排除"被阻挡"的敌人和动作锁定的敌人
     auto view = registry.view<engine::component::VelocityComponent,
         engine::component::TransformComponent,
-        game::component::EnemyComponent>(entt::exclude<game::component::BlockedByComponent>);
+        game::component::EnemyComponent>(entt::exclude<game::component::BlockedByComponent, game::defs::ActionLockTag>);
 
     for (auto entity : view) {
         auto& velocity = view.get<engine::component::VelocityComponent>(entity);

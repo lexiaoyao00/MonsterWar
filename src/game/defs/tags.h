@@ -11,4 +11,8 @@ struct FaceLeftTag {};          ///< @brief 角色图片默认朝右，如果朝
 struct MeleeUnitTag {};         ///< @brief 近战单位标签
 struct RangedUnitTag {};        ///< @brief 远程单位标签
 struct HealerTag{};             ///< @brief 治疗单位标签
+
+struct AttackReadyTag {};       ///< @brief 攻击准备标签，用于标记实体攻击准备就绪
+struct InjuredTag {};           ///< @brief 受伤标签，用于标记实体受伤
+struct ActionLockTag {};        ///< @brief 动作锁定标签，让角色播放完当前动画再进行下一步动作
 }   // namespace game::defs
