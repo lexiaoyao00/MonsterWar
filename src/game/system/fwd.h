@@ -9,4 +9,6 @@ class SetTargetSystem;
 class OrientationSystem;
 class AttackStarterSystem;
 class AnimationStateSystem;
+class AnimationEventSystem;
+class CombatResolveSystem;
 }

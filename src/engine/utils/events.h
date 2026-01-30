@@ -29,4 +29,15 @@ struct AnimationFinishedEvent {  // 动画播放完毕事件
     entt::id_type animation_id_{entt::null}; // 动画id
 };
 
+struct AnimationEvent{ // 动画事件
+    entt::entity entity_{entt::null};       // 目标实体
+    entt::id_type event_name_id_{entt::null}; // 事件id
+    entt::id_type animation_name_id_{entt::null}; // 动画id
+};
+
+struct PlaySoundEvent { // 播放声音事件
+    entt::entity entity_{entt::null};       // 目标实体（可以为空，即播放全局音效）
+    entt::id_type sound_id_{entt::null}; // 音效id
+};
+
 } // namespace engine::utils

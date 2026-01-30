@@ -5,6 +5,7 @@
 #include "../../engine/system/movement_system.h"
 #include "../../engine/system/animation_system.h"
 #include "../../engine/system/ysort_system.h"
+#include "../../engine/system/audio_system.h"
 #include "../../engine/loader/level_loader.h"
 #include "../../engine/component/transform_component.h"
 #include "../../engine/component/velocity_component.h"
@@ -19,6 +20,8 @@
 #include "../system/orientation_system.h"
 #include "../system/set_target_system.h"
 #include "../system/timer_system.h"
+#include "../system/animation_event_system.h"
+#include "../system/combat_resolve_system.h"
 #include "../component/enemy_component.h"
 #include "../component/player_component.h"
 #include "../component/stats_component.h"
@@ -42,6 +45,7 @@ GameScene::GameScene(engine::core::Context& context)
     movement_system_ = std::make_unique<engine::system::MovementSystem>();
     animation_system_ = std::make_unique<engine::system::AnimationSystem>(registry_, dispatcher);
     ysort_system_ = std::make_unique<engine::system::YSortSystem>();
+    audio_system_ = std::make_unique<engine::system::AudioSystem>(registry_, context_);
 
     follow_path_system_ = std::make_unique<game::system::FollowPathSystem>();
     remove_dead_system_ = std::make_unique<game::system::RemoveDeadSystem>();
@@ -51,6 +55,8 @@ GameScene::GameScene(engine::core::Context& context)
     set_target_system_ = std::make_unique<game::system::SetTargetSystem>();
     timer_system_ = std::make_unique<game::system::TimerSystem>();
     animation_state_system_ = std::make_unique<game::system::AnimationStateSystem>(registry_, dispatcher);
+    animation_event_system_ = std::make_unique<game::system::AnimationEventSystem>(registry_, dispatcher);
+    combat_resolve_system_ = std::make_unique<game::system::CombatResolveSystem>(registry_, dispatcher);
 
 
     spdlog::info("GameScene 构造完成");

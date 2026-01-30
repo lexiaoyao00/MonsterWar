@@ -42,6 +42,7 @@ struct AnimationBlueprint {
     float ms_per_frame_{0.0f};
     int row_{0};
     std::vector<int> frames_; // 动画帧
+    std::unordered_map<int, entt::id_type> events_; // 动画事件,key为帧数，value为事件id
 };
 
 /**

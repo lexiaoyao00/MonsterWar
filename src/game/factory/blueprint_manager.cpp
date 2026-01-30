@@ -135,9 +135,18 @@ std::unordered_map<entt::id_type, data::AnimationBlueprint> BlueprintManager::pa
     for (auto& [anim_name, anim_data] : json["animation"].items()) {
         auto anim_name_id = entt::hashed_string(anim_name.c_str());
         std::vector<int> frames = anim_data["frames"].get<std::vector<int>>();
+        // 处理可能存在的动画事件信息
+        std::unordered_map<int, entt::id_type> events;
+        if (anim_data.contains("events")) {
+            for (auto& [event_name, event_frame] : anim_data["events"].items()) {
+                events.emplace(event_frame.get<int>(), entt::hashed_string(event_name.c_str()));
+            }
+        }
+        // 创建动画蓝图并插入容器
         data::AnimationBlueprint animation{anim_data.value("duration", 100.0f),
             anim_data.value("row", 0),
-            std::move(frames)
+            std::move(frames),
+            std::move(events)
         };
         animations.emplace(anim_name_id, animation);
     }
@@ -147,7 +156,7 @@ std::unordered_map<entt::id_type, data::AnimationBlueprint> BlueprintManager::pa
 data::SoundBlueprint BlueprintManager::parseSound(const nlohmann::json &json)
 {
     data::SoundBlueprint sounds;
-    if (json.contains("sound")) {   // 如果包含音效
+    if (json.contains("sounds")) {   // 如果包含音效
         for (auto& [sound_key, sound_value] : json["sounds"].items()) {
             std::string sound_path = sound_value.get<std::string>();
             entt::id_type sound_id = entt::hashed_string(sound_path.c_str());
