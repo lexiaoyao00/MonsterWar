@@ -33,6 +33,7 @@ private:
     std::unique_ptr<game::system::TimerSystem> timer_system_;
     std::unique_ptr<game::system::AnimationEventSystem> animation_event_system_;
     std::unique_ptr<game::system::CombatResolveSystem> combat_resolve_system_;
+    std::unique_ptr<game::system::ProjectileSystem> projectile_system_;
 
 
     std::unordered_map<int, game::data::WaypointNode> waypoint_nodes_;  // 路径节点ID到节点数据的映射
@@ -57,6 +58,7 @@ private:
     [[nodiscard]] bool initEventConnections();
     [[nodiscard]] bool initInputConnections();
     [[nodiscard]] bool initEntityFactory();
+    [[nodiscard]] bool initSystems();
 
 
     // 事件回调函数

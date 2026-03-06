@@ -20,6 +20,7 @@ private:
     void onAnimationEvent(const engine::utils::AnimationEvent& event);
 
     // 拆分不同的事件
-    void handleHitEvent(const engine::utils::AnimationEvent& event);
+    void handleHitEvent(const engine::utils::AnimationEvent& event);    // 命中事件
+    void handleEmitEvent(const engine::utils::AnimationEvent& event);   // 发射事件
 };
 }

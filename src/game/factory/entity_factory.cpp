@@ -14,6 +14,7 @@
 #include "../component/class_name_component.h"
 #include "../component/player_component.h"
 #include "../component/blocker_component.h"
+#include "../component/projectile_component.h"
 #include <entt/entity/registry.hpp>
 #include <entt/core/hashed_string.hpp>
 #include <spdlog/spdlog.h>
@@ -50,6 +51,9 @@ entt::entity EntityFactory::createEnemyUnit(entt::id_type class_id, const glm::v
     // 添加Enemy组件
     addEnemyComponent(entity, blueprint.enemy_, target_waypoint_id);
 
+    // 添加ProjectileID组件
+    addProjectileComponent(entity, blueprint.projectile_id_);
+
     // 补充其他必要组件
     registry_.emplace<game::component::ClassNameComponent>(entity, class_id, blueprint.display_info_.name_);
     registry_.emplace<engine::component::RenderComponent>(entity);  // 使用默认主图层
@@ -82,6 +86,9 @@ entt::entity EntityFactory::createPlayerUnit(entt::id_type class_id, const glm::
     // 添加Player组件
     addPlayerComponent(entity, blueprint.player_);
 
+    // 添加ProjectileID组件
+    addProjectileComponent(entity, blueprint.projectile_id_);
+
     // 补充其他必要组件
     registry_.emplace<game::component::ClassNameComponent>(entity, class_id, blueprint.display_info_.name_);
     registry_.emplace<engine::component::RenderComponent>(entity);  // 使用默认主图层
@@ -90,6 +97,30 @@ entt::entity EntityFactory::createPlayerUnit(entt::id_type class_id, const glm::
 
     return entity;
 
+}
+
+entt::entity EntityFactory::createProjectile(entt::id_type id, const glm::vec2 &start_position, const glm::vec2 &target_position, entt::entity target, float damage)
+{
+    auto entity = registry_.create();
+    const auto& blueprint = blueprint_manager_.getProjectileBlueprint(id);
+    registry_.emplace<game::component::ProjectileComponent>(entity,
+        target,
+        damage,
+        start_position,
+        target_position,
+        start_position,
+        blueprint.arc_height_,
+        blueprint.total_flight_time_,
+        0.0f
+    );
+
+    addSpriteComponent(entity, blueprint.sprite_);
+    addTransformComponent(entity, start_position);
+    addAudioComponent(entity, blueprint.sounds_);
+    // 添加 RenerComponent 来展示在主图层以上，覆盖角色
+    registry_.emplace<engine::component::RenderComponent>(entity, engine::component::RenderComponent::MAIN_LAYER + 1);
+
+    return entity;
 }
 
 void EntityFactory::addTransformComponent(entt::entity entity, const glm::vec2& position, const glm::vec2& scale, float rotation) {
@@ -190,6 +221,12 @@ void EntityFactory::addAudioComponent(entt::entity entity, const data::SoundBlue
         audio_map.emplace(sound_key, sound_id);
     }
     registry_.emplace<engine::component::AudioComponent>(entity, std::move(audio_map));
+}
+
+void EntityFactory::addProjectileComponent(entt::entity entity, entt::id_type id)
+{
+    if (id == entt::null) return;
+    registry_.emplace<game::component::ProjectileIDComponent>(entity, id);
 }
 
 }   // namespace game::factory

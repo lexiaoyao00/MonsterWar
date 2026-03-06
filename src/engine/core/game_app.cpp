@@ -35,11 +35,14 @@ void GameApp::run() {
     while (is_running_) {
         time_->update();
         float delta_time = time_->getDeltaTime();
-        
+
         handleEvents();
         update(delta_time);
         render();
 
+
+        // 分发事件,让新创建的实体先更新再渲染(实体都是事件系统中创建的)
+        dispatcher_->update();
         // spdlog::info("delta_time: {}", delta_time);
     }
 
@@ -95,8 +98,6 @@ void GameApp::update(float delta_time) {
     // 游戏逻辑更新
     scene_manager_->update(delta_time);
 
-    // 分发事件
-    dispatcher_->update();
 }
 
 void GameApp::render() {
@@ -296,10 +297,10 @@ bool GameApp::initContext()
     try {
         context_ = std::make_unique<engine::core::Context>(*dispatcher_,
                                                            *input_manager_,
-                                                           *renderer_, 
-                                                           *camera_, 
+                                                           *renderer_,
+                                                           *camera_,
                                                            *text_renderer_,
-                                                           *resource_manager_, 
+                                                           *resource_manager_,
                                                            *audio_player_,
                                                            *game_state_);
     } catch (const std::exception& e) {
