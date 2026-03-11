@@ -5,8 +5,12 @@
 #include "../component/enemy_component.h"
 #include "../component/blocked_by_component.h"
 #include "../component/blocker_component.h"
+#include "../component/class_name_component.h"
 #include "../defs/tags.h"
 #include "../defs/events.h"
+
+#include "../../engine/component/transform_component.h"
+#include "../../engine/component/sprite_component.h"
 
 #include <entt/entity/registry.hpp>
 #include <entt/signal/dispatcher.hpp>
@@ -61,7 +65,11 @@ void CombatResolveSystem::onAttackEvent(const game::defs::AttackEvent &event)
             registry_.emplace<game::defs::DeadTag>(event.target_);
             spdlog::info("敌人 ID: {} 死亡", entt::to_integral(event.target_));
 
-            // TODO:添加死亡特效
+            // 发送死亡特效事件
+            const auto [class_name, transform, sprite] = registry_.get<game::component::ClassNameComponent,
+                engine::component::TransformComponent,
+                engine::component::SpriteComponent>(event.target_);
+            dispatcher_.enqueue(game::defs::EnemyDeathEffectEvent{class_name.class_id_, transform.position_, sprite.sprite_.is_flipped_});
             // TODO: 更新统计信息
             // 如果敌人被阻挡，减少阻挡者的阻挡计数
             if (auto blocked_by = registry_.try_get<game::component::BlockedByComponent>(event.target_); blocked_by) {

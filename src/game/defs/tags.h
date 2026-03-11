@@ -15,4 +15,7 @@ struct HealerTag{};             ///< @brief 治疗单位标签
 struct AttackReadyTag {};       ///< @brief 攻击准备标签，用于标记实体攻击准备就绪
 struct InjuredTag {};           ///< @brief 受伤标签，用于标记实体受伤
 struct ActionLockTag {};        ///< @brief 动作锁定标签，让角色播放完当前动画再进行下一步动作
+
+struct OneShotRemoveTag {};   ///< @brief 一次性移除标签，用于标记实体在播放完动画后移除自身
+struct HasHealthBarTag {};   ///< @brief 血量条标签，用于标记实体是否需要显示健康条
 }   // namespace game::defs

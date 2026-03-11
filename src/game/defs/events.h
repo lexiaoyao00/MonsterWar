@@ -22,4 +22,11 @@ struct EmitProjectileEvent {    // 发射投射物事件
     glm::vec2 target_position_{};   // 目标位置
     float damage_{};                 // 伤害
 };
+
+struct EnemyDeathEffectEvent{   // 敌人死亡特效事件
+    entt::id_type class_id_{entt::null};  // 敌人id
+    glm::vec2 position_{};   // 位置
+    bool is_flipped_{};   // 是否翻转
+};
+
 }

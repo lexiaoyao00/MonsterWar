@@ -23,6 +23,8 @@
 #include "../system/animation_event_system.h"
 #include "../system/combat_resolve_system.h"
 #include "../system/projectile_system.h"
+#include "../system/effect_system.h"
+#include "../system/health_bar_system.h"
 #include "../component/enemy_component.h"
 #include "../component/player_component.h"
 #include "../component/stats_component.h"
@@ -96,8 +98,12 @@ void GameScene::update(float delta_time) {
 }
 
 void GameScene::render() {
-    render_system_->update(registry_, context_.getRenderer(), context_.getCamera());
+    auto& renderer = context_.getRenderer();
+    auto& camera = context_.getCamera();
 
+    // 注意渲染顺序，保证遮盖关系
+    render_system_->update(registry_, renderer, camera);
+    health_bar_system_->update(registry_, renderer, camera);
     Scene::render();
 }
 
@@ -191,6 +197,8 @@ bool GameScene::initSystems()
     animation_event_system_ = std::make_unique<game::system::AnimationEventSystem>(registry_, dispatcher);
     combat_resolve_system_ = std::make_unique<game::system::CombatResolveSystem>(registry_, dispatcher);
     projectile_system_ = std::make_unique<game::system::ProjectileSystem>(registry_, dispatcher, *entity_factory_);
+    effect_system_ = std::make_unique<game::system::EffectSystem>(registry_, dispatcher, *entity_factory_);
+    health_bar_system_ = std::make_unique<game::system::HealthBarSystem>();
 
     spdlog::info("系统初始化完成");
     return true;
@@ -218,11 +226,12 @@ void GameScene::createTestEnemy()
 bool GameScene::onCreateTestPlayerMelee()
 {
     auto position = context_.getInputManager().getMousePosition();
-    auto entity = entity_factory_->createPlayerUnit("warrior"_hs, position);
+    entity_factory_->createPlayerUnit("warrior"_hs, position);
+    // auto entity = entity_factory_->createPlayerUnit("warrior"_hs, position);
     // 让玩家处于受伤状态，以便测试治疗者
-    registry_.emplace<game::defs::InjuredTag>(entity);
-    auto& stats = registry_.get<game::component::StatsComponent>(entity);
-    stats.hp_ = stats.max_hp_ / 2;
+    // registry_.emplace<game::defs::InjuredTag>(entity);
+    // auto& stats = registry_.get<game::component::StatsComponent>(entity);
+    // stats.hp_ = stats.max_hp_ / 2;
     spdlog::info("创建了一个战士,位置: {}, {}", position.x, position.y);
     return true;
 }
@@ -230,11 +239,12 @@ bool GameScene::onCreateTestPlayerMelee()
 bool GameScene::onCreateTestPlayerRanged()
 {
     auto position = context_.getInputManager().getMousePosition();
-    auto entity = entity_factory_->createPlayerUnit("archer"_hs, position);
+    entity_factory_->createPlayerUnit("archer"_hs, position);
+    // auto entity = entity_factory_->createPlayerUnit("archer"_hs, position);
     // 让玩家处于受伤状态，以便测试治疗者
-    registry_.emplace<game::defs::InjuredTag>(entity);
-    auto& stats = registry_.get<game::component::StatsComponent>(entity);
-    stats.hp_ = stats.max_hp_ / 2;
+    // registry_.emplace<game::defs::InjuredTag>(entity);
+    // auto& stats = registry_.get<game::component::StatsComponent>(entity);
+    // stats.hp_ = stats.max_hp_ / 2;
     spdlog::info("创建了一个弓箭手,位置: {}, {}", position.x, position.y);
     return true;
 }

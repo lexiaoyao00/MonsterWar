@@ -360,6 +360,8 @@ set(SOURCES
     src/game/system/animation_event_system.cpp
     src/game/system/combat_resolve_system.cpp
     src/game/system/projectile_system.cpp
+    src/game/system/effect_system.cpp
+    src/game/system/health_bar_system.cpp
     src/game/factory/blueprint_manager.cpp
     src/game/factory/entity_factory.cpp
 )

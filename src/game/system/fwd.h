@@ -12,4 +12,6 @@ class AnimationStateSystem;
 class AnimationEventSystem;
 class CombatResolveSystem;
 class ProjectileSystem;
+class EffectSystem;
+class HealthBarSystem;
 }
