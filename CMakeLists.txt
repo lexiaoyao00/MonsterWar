@@ -365,6 +365,7 @@ set(SOURCES
     src/game/factory/blueprint_manager.cpp
     src/game/factory/entity_factory.cpp
     src/game/data/session_data.cpp
+    src/game/data/ui_config.cpp
 )
 
 # --- 添加 ImGui 开始 ---
