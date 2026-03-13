@@ -17,7 +17,7 @@ bool UIManager::init(const glm::vec2& window_size) {
     root_element_->setSize(window_size);
     spdlog::trace("UI管理器已初始化根面板。");
     return true;
-}   
+}
 
 void UIManager::addElement(std::unique_ptr<UIElement> element) {
     if (root_element_) {
@@ -32,14 +32,6 @@ void UIManager::clearElements() {
         root_element_->removeAllChildren();
         spdlog::trace("所有UI元素已从UI管理器中清除。");
     }
-}
-
-bool UIManager::handleInput(engine::core::Context& context) {
-    if (root_element_ && root_element_->isVisible()) {
-        // 从根元素开始向下分发事件
-        if (root_element_->handleInput(context)) return true;
-    }
-    return false;
 }
 
 void UIManager::update(float delta_time, engine::core::Context& context) {
@@ -60,4 +52,4 @@ UIPanel* UIManager::getRootElement() const {
     return root_element_.get();
 }
 
-} // namespace engine::ui 
+} // namespace engine::ui
