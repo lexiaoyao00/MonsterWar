@@ -93,13 +93,13 @@ void UIConfig::loadPortrait(nlohmann::json &json)
 void UIConfig::loadPortraitFrame(nlohmann::json &json)
 {
     for (auto& [key, value] : json.items()) {
-        entt::id_type id = entt::hashed_string(key.c_str());
         auto texture_path = value["sprite_sheet"].get<std::string>();
+        int level = value["level"].get<int>();
         engine::utils::Rect stc_rect = {static_cast<float>(value["x"]),
                                          static_cast<float>(value["y"]),
                                          static_cast<float>(value["width"]),
                                          static_cast<float>(value["height"])};
-        portrait_frame_map_[id] = engine::render::Image(texture_path, stc_rect, false);
+        portrait_frame_map_[level] = engine::render::Image(texture_path, stc_rect, false);
     }
 }
 

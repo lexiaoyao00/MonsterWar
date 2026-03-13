@@ -5,6 +5,7 @@
 #include "../system/fwd.h"
 #include "../defs/events.h"
 #include "../data/session_data.h"
+#include "../data/ui_config.h"
 #include <memory>
 #include <unordered_map>
 #include <vector>
@@ -12,6 +13,10 @@
 namespace game::factory {
     class BlueprintManager;
     class EntityFactory;
+}
+
+namespace engine::ui {
+    class UIElement;
 }
 
 namespace game::scene {
@@ -47,6 +52,7 @@ private:
     // 管理数据的实例很有可能同时被多个场景使用，因此使用共享指针
     std::shared_ptr<game::factory::BlueprintManager> blueprint_manager_;    // 蓝图管理器
     std::shared_ptr<game::data::SessionData> session_data_;                 // 会话数据
+    std::shared_ptr<game::data::UIConfig> ui_config_;                     // UI数据
 
 
     int level_number_{1};  // 当前关卡编号
@@ -61,12 +67,18 @@ public:
 
 private:
     [[nodiscard]] bool initSessionData();
+    [[nodiscard]] bool initUIConfig();
     [[nodiscard]] bool loadLevel();
     [[nodiscard]] bool initEventConnections();
     [[nodiscard]] bool initInputConnections();
     [[nodiscard]] bool initEntityFactory();
     [[nodiscard]] bool initSystems();
 
+
+    void createUnitsPortraitUI();   // 创建肖像UI
+
+    // 排序肖像UI
+    void arrangeUnitsPortraitsUI(engine::ui::UIElement* anchor_panel, const glm::vec2& frame_size, float padding);
 
     // 事件回调函数
     void onEnemyArriveHome(const game::defs::EnemyArriveHomeEvent& event);
