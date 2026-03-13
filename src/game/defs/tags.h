@@ -18,4 +18,7 @@ struct ActionLockTag {};        ///< @brief 动作锁定标签，让角色播放
 
 struct OneShotRemoveTag {};   ///< @brief 一次性移除标签，用于标记实体在播放完动画后移除自身
 struct HasHealthBarTag {};   ///< @brief 血量条标签，用于标记实体是否需要显示健康条
+
+struct MeleePlaceTag{};       ///< @brief 近战攻击单位放置区域标签
+struct RangedPlaceTag{};       ///< @brief 远程攻击单位放置区域标签
 }   // namespace game::defs

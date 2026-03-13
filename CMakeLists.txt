@@ -362,10 +362,12 @@ set(SOURCES
     src/game/system/projectile_system.cpp
     src/game/system/effect_system.cpp
     src/game/system/health_bar_system.cpp
+    src/game/system/game_rule_system.cpp
     src/game/factory/blueprint_manager.cpp
     src/game/factory/entity_factory.cpp
     src/game/data/session_data.cpp
     src/game/data/ui_config.cpp
+    src/game/ui/units_portrait_ui.cpp
 )
 
 # --- 添加 ImGui 开始 ---

@@ -6,6 +6,7 @@
 #include "../defs/events.h"
 #include "../data/session_data.h"
 #include "../data/ui_config.h"
+#include "../data/game_stats.h"
 #include <memory>
 #include <unordered_map>
 #include <vector>
@@ -13,6 +14,10 @@
 namespace game::factory {
     class BlueprintManager;
     class EntityFactory;
+}
+
+namespace game::ui {
+    class UnitsPortraitUI;
 }
 
 namespace engine::ui {
@@ -42,10 +47,13 @@ private:
     std::unique_ptr<game::system::ProjectileSystem> projectile_system_;
     std::unique_ptr<game::system::EffectSystem> effect_system_;
     std::unique_ptr<game::system::HealthBarSystem> health_bar_system_;
+    std::unique_ptr<game::system::GameRuleSystem> game_rule_system_;
 
+    std::unique_ptr<game::ui::UnitsPortraitUI> units_portrait_ui_;      // 封装的单位肖像UI，负责管理单位肖像UI的创建、更新和排列
 
     std::unordered_map<int, game::data::WaypointNode> waypoint_nodes_;  // 路径节点ID到节点数据的映射
     std::vector<int> start_points_;  // 起始节点ID的列表
+    game::data::GameStats game_stats_;  // 游戏统计数据
 
     std::unique_ptr<game::factory::EntityFactory> entity_factory_;
 
@@ -72,16 +80,9 @@ private:
     [[nodiscard]] bool initEventConnections();
     [[nodiscard]] bool initInputConnections();
     [[nodiscard]] bool initEntityFactory();
+    [[nodiscard]] bool initRegistryContext();
+    [[nodiscard]] bool initUnitsPortraitUI();
     [[nodiscard]] bool initSystems();
-
-
-    void createUnitsPortraitUI();   // 创建肖像UI
-
-    // 排序肖像UI
-    void arrangeUnitsPortraitsUI(engine::ui::UIElement* anchor_panel, const glm::vec2& frame_size, float padding);
-
-    // 事件回调函数
-    void onEnemyArriveHome(const game::defs::EnemyArriveHomeEvent& event);
 
     // 测试函数
     void testSessionData();

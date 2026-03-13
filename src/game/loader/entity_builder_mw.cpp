@@ -1,5 +1,7 @@
 #include "entity_builder_mw.h"
 #include "../../engine/core/context.h"
+#include "../../engine/component/tilelayer_component.h"
+#include "../defs/tags.h"
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
 
@@ -19,6 +21,7 @@ EntityBuilderMW *EntityBuilderMW::build()
         buildPath();
     } else {
         BasicEntityBuilder::build();
+        buildPlace();   // 如果识别到地点类型就添加
     }
 
     return this;
@@ -51,5 +54,22 @@ void EntityBuilderMW::buildPath()
     // 添加到节点容器中
     waypoint_nodes_[id] = game::data::WaypointNode{id, std::move(position), std::move(next_node_ids)};
     spdlog::trace("waypoint nodes size: {} ", waypoint_nodes_.size());
+}
+void EntityBuilderMW::buildPlace()
+{
+    if (tile_info_ && tile_info_->properties_) {
+        auto& properties = tile_info_->properties_.value();
+        for (auto& property : properties) {
+            if (property.value("name", "") == "place") {
+                auto type = property.value("value", "");
+                if (type == "melee") {  // 近战单位放置区域
+                    registry_.emplace<game::defs::MeleePlaceTag>(entity_id_);
+                } else if (type == "range"){  // 远程单位放置区域
+                    registry_.emplace<game::defs::RangedPlaceTag>(entity_id_);
+                }
+                // TODO: 其他类型
+            }
+        }
+    }
 }
 }

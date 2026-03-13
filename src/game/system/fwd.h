@@ -14,4 +14,5 @@ class CombatResolveSystem;
 class ProjectileSystem;
 class EffectSystem;
 class HealthBarSystem;
+class GameRuleSystem;
 }

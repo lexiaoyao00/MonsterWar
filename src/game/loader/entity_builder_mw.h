@@ -25,6 +25,7 @@ public:
 
 private:
     void buildPath(); // 构建路径节点
+    void buildPlace(); // 构建单位放置区域标签
 
 };
 }
