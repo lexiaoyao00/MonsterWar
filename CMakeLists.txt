@@ -364,6 +364,7 @@ set(SOURCES
     src/game/system/health_bar_system.cpp
     src/game/factory/blueprint_manager.cpp
     src/game/factory/entity_factory.cpp
+    src/game/data/session_data.cpp
 )
 
 # --- 添加 ImGui 开始 ---

@@ -49,6 +49,10 @@ GameScene::~GameScene() {
 }
 
 void GameScene::init() {
+    if (!initSessionData()) {
+        spdlog::error("初始化会话数据失败");
+        return;
+    }
     if (!loadLevel()) {
         spdlog::error("加载关卡失败");
         return;
@@ -71,6 +75,7 @@ void GameScene::init() {
     }
 
     createTestEnemy();
+    testSessionData();
 
     Scene::init();
 }
@@ -123,7 +128,21 @@ void GameScene::clean() {
     Scene::clean();
 }
 
-bool GameScene::loadLevel() {
+bool GameScene::initSessionData()
+{
+    if (!session_data_) {
+        session_data_ = std::make_shared<game::data::SessionData>();
+        if (!session_data_->loadDefaultData()) {
+            spdlog::error("加载默认 session_data 失败");
+            return false;
+        }
+    }
+    level_number_ = session_data_->getLevelNumber();
+    return true;
+}
+
+bool GameScene::loadLevel()
+{
     engine::loader::LevelLoader level_loader;
     // 设置拓展的构建器 EntityBuilderMW
     level_loader.setEntityBuilder(std::make_unique<game::loader::EntityBuilderMW>(
@@ -208,6 +227,17 @@ void GameScene::onEnemyArriveHome(const game::defs::EnemyArriveHomeEvent&)
 {
     spdlog::info("敌人到达基地了");
     // TODO: 处理敌人到达家的事件
+}
+
+void GameScene::testSessionData()
+{
+    spdlog::info("当前关卡: {}", level_number_);
+    spdlog::info("当前积分: {}", session_data_->getPoint());
+    spdlog::info("是否通关: {}", session_data_->isLevelClear());
+    for (auto& unit : session_data_->getUnitMap()) {
+        spdlog::info("角色: {}, 职业: {}, 等级: {}, 稀有度: {}",
+            unit.second.name_, unit.second.class_, unit.second.level_, unit.second.rarity_);
+    }
 }
 
 void GameScene::createTestEnemy()
