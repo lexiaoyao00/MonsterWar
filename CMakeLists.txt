@@ -369,7 +369,9 @@ set(SOURCES
     src/game/factory/entity_factory.cpp
     src/game/data/session_data.cpp
     src/game/data/ui_config.cpp
+    src/game/data/level_config.cpp
     src/game/ui/units_portrait_ui.cpp
+    src/game/spawner/enemy_spawner.cpp
 )
 
 # --- 添加 ImGui 开始 ---

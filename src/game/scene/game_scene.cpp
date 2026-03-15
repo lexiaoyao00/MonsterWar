@@ -42,6 +42,7 @@
 #include "../factory/entity_factory.h"
 #include "../defs/tags.h"
 #include "../ui/units_portrait_ui.h"
+#include "../spawner/enemy_spawner.h"
 #include <entt/core/hashed_string.hpp>
 #include <entt/signal/sigh.hpp>
 #include <spdlog/spdlog.h>
@@ -61,6 +62,7 @@ GameScene::~GameScene() {
 
 void GameScene::init() {
     if (!initSessionData())         { spdlog::error("初始化会话数据失败"); return; }
+    if (!initLevelConfig())         { spdlog::error("初始化关卡配置失败"); return; }
     if (!initUIConfig())            { spdlog::error("初始化UI配置失败"); return; }
     if (!loadLevel())               { spdlog::error("加载关卡失败"); return; }
     if (!initEventConnections())    { spdlog::error("初始化事件连接失败"); return; }
@@ -69,8 +71,8 @@ void GameScene::init() {
     if (!initRegistryContext())     { spdlog::error("初始化注册表上下文失败"); return; }
     if (!initUnitsPortraitUI())     { spdlog::error("初始化单位肖像UI失败"); return; }
     if (!initSystems())             { spdlog::error("初始化系统失败"); return; }
+    if (!initEnemySpawner())        { spdlog::error("初始化敌人生成器失败"); return; }
 
-    createTestEnemy();
     Scene::init();
 }
 
@@ -96,6 +98,7 @@ void GameScene::update(float delta_time) {
     ysort_system_->update(registry_);   // 调用顺序要在 MovementSystem 之后
 
     // 场景中的其他更新
+    enemy_spawner_->update(delta_time);
     units_portrait_ui_->update(delta_time);
     Scene::update(delta_time);
 }
@@ -137,6 +140,20 @@ bool GameScene::initSessionData()
     return true;
 }
 
+bool GameScene::initLevelConfig()
+{
+    if (!level_config_){
+        level_config_ = std::make_shared<game::data::LevelConfig>();
+        if (!level_config_->loadFromFile("assets/data/level_config.json")) {
+            spdlog::error("加载关卡配置失败");
+            return false;
+        }
+    }
+    waves_ = level_config_->getWavesData(level_number_);
+    game_stats_.enemy_count_ = level_config_->getTotalEnemyCount(level_number_);
+    return true;
+}
+
 bool GameScene::initUIConfig()
 {
     if (!ui_config_) {
@@ -160,7 +177,7 @@ bool GameScene::loadLevel()
         waypoint_nodes_,
         start_points_
     ));
-    if (!level_loader.loadLevel("assets/maps/level1.tmj", this)) {
+    if (!level_loader.loadLevel(level_config_->getMapPath(level_number_), this)) {
         spdlog::error("加载关卡失败");
         return false;
     }
@@ -187,7 +204,12 @@ bool GameScene::initRegistryContext()
     registry_.ctx().emplace<std::shared_ptr<game::factory::BlueprintManager>>(blueprint_manager_);
     registry_.ctx().emplace<std::shared_ptr<game::data::SessionData>>(session_data_);
     registry_.ctx().emplace<std::shared_ptr<game::data::UIConfig>>(ui_config_);
+    registry_.ctx().emplace<std::shared_ptr<game::data::LevelConfig>>(level_config_);
+    registry_.ctx().emplace<std::unordered_map<int, game::data::WaypointNode>&>(waypoint_nodes_);
+    registry_.ctx().emplace<std::vector<int>&>(start_points_);
     registry_.ctx().emplace<game::data::GameStats&>(game_stats_);
+    registry_.ctx().emplace<game::data::Waves&>(waves_);
+    registry_.ctx().emplace<int&>(level_number_);
     spdlog::info("registry_ 上下文初始化完成");
     return true;
 }
@@ -256,17 +278,11 @@ bool GameScene::initSystems()
     return true;
 }
 
-void GameScene::createTestEnemy()
+bool GameScene::initEnemySpawner()
 {
-    // 每个起点创建一批敌人
-    for (auto start_index : start_points_) {
-        auto position = waypoint_nodes_[start_index].position_;
-
-        entity_factory_->createEnemyUnit("wolf"_hs, position, start_index);
-        entity_factory_->createEnemyUnit("slime"_hs, position, start_index);
-        entity_factory_->createEnemyUnit("goblin"_hs, position, start_index);
-        entity_factory_->createEnemyUnit("dark_witch"_hs, position, start_index);
-    }
+    enemy_spawner_ = std::make_unique<game::spawner::EnemySpawner>(registry_, *entity_factory_);
+    spdlog::info("敌人生成器初始化完成");
+    return true;
 }
 
 bool GameScene::onClearAllPlayers()
