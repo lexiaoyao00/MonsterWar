@@ -21,4 +21,6 @@ struct HasHealthBarTag {};   ///< @brief 血量条标签，用于标记实体是
 
 struct MeleePlaceTag{};       ///< @brief 近战攻击单位放置区域标签
 struct RangedPlaceTag{};       ///< @brief 远程攻击单位放置区域标签
+
+struct ShowRangeTag{};       ///< @brief 显示攻击范围标签
 }   // namespace game::defs

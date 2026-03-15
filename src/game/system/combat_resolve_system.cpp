@@ -46,7 +46,7 @@ void CombatResolveSystem::onAttackEvent(const game::defs::AttackEvent &event)
         // 死亡
         if (target_stats.hp_ <= 0) {
             target_stats.hp_ = 0;
-            registry_.emplace_or_replace<game::defs::DeadTag>(event.target_);   // 使用 emplace_or_replace 更健壮，防止原来存在DeadTag
+            dispatcher_.enqueue<game::defs::RemovePlayerUnitEvent>(event.target_);
             spdlog::info("玩家 ID: {} 死亡", entt::to_integral(event.target_));
         } else if (target_stats.hp_ < target_stats.max_hp_) { // 受伤
             registry_.emplace_or_replace<game::defs::InjuredTag>(event.target_);

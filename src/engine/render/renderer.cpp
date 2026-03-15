@@ -5,6 +5,9 @@
 #include <SDL3/SDL.h>
 #include <stdexcept> // For std::runtime_error
 #include <spdlog/spdlog.h>
+#include <entt/core/hashed_string.hpp>
+
+using namespace entt::literals;
 
 namespace engine::render {
 
@@ -24,7 +27,9 @@ Renderer::Renderer(SDL_Renderer* sdl_renderer, engine::resource::ResourceManager
     spdlog::trace("Renderer 构造成功。");
 }
 
-void Renderer::drawSprite(const Camera& camera, const component::Sprite& sprite, const glm::vec2& position, const glm::vec2& size, const float rotation) {
+void Renderer::drawSprite(const Camera& camera, const component::Sprite& sprite,
+                        const glm::vec2& position, const glm::vec2& size, const float rotation,
+                        const engine::utils::FColor& color) {
     auto texture = resource_manager_->getTexture(sprite.texture_id_, sprite.texture_path_);
     if (!texture) {
         spdlog::error("无法为 ID {} 获取纹理。", sprite.texture_id_);
@@ -53,6 +58,10 @@ void Renderer::drawSprite(const Camera& camera, const component::Sprite& sprite,
         sprite.src_rect_.size.x,
         sprite.src_rect_.size.y
     };
+
+    // 设置调整颜色和透明度
+    SDL_SetTextureColorModFloat(texture, color.r, color.g, color.b);
+    SDL_SetTextureAlphaModFloat(texture, color.a);
 
     // 执行绘制(默认旋转中心为精灵的中心点)
     if (!SDL_RenderTextureRotated(renderer_, texture, &src_rect, &dest_rect, rotation, NULL, sprite.is_flipped_ ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE)) {
@@ -148,6 +157,26 @@ void Renderer::drawFilledRect(const Camera &camera, const glm::vec2 &position, c
         spdlog::error("绘制填充矩形失败：{}", SDL_GetError());
     }
     setDrawColorFloat(0, 0, 0, 1.0f);
+}
+
+void Renderer::drawFilledCircle(const Camera &camera, const glm::vec2 &center, const float radius, const engine::utils::FColor &color)
+{
+    auto circle_texture = resource_manager_->getTexture("assets/textures/UI/circle.png"_hs);
+    if (!circle_texture) {
+        spdlog::error("无法获取圆形纹理。");
+        return;
+    }
+
+    auto screen_center = camera.worldToScreen(center);
+    // 设置颜色和透明度
+    SDL_SetTextureColorModFloat(circle_texture, color.r, color.g, color.b);
+    SDL_SetTextureAlphaModFloat(circle_texture, color.a);
+
+    // 绘制圆形
+    SDL_FRect dest_rect = {screen_center.x - radius, screen_center.y - radius, radius * 2, radius * 2};
+    if (!SDL_RenderTextureRotated(renderer_, circle_texture, nullptr, &dest_rect, 0.0, nullptr, SDL_FLIP_NONE)) {
+        spdlog::error("渲染圆形失败：{}", SDL_GetError());
+    }
 }
 
 void Renderer::present()

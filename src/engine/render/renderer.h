@@ -46,9 +46,11 @@ public:
      * @param position 世界坐标中的左上角位置。
      * @param size 精灵的大小。
      * @param rotation 旋转角度（度）。
+     * @param color 精灵的调整颜色，默认为白色即不做调整
      */
     void drawSprite(const Camera& camera, const component::Sprite& sprite, const glm::vec2& position,
-                    const glm::vec2& size, const float rotation = 0.0f);
+                    const glm::vec2& size, const float rotation = 0.0f,
+                    const engine::utils::FColor& color = engine::utils::FColor::white());
 
     /**
      * @brief 在屏幕坐标中直接渲染一个用于UI的Image对象。
@@ -57,7 +59,8 @@ public:
      * @param position 屏幕坐标中的左上角位置。
      * @param size 可选：目标矩形的大小。如果为 std::nullopt，则使用Image的原始大小。
      */
-    void drawUIImage(const Image& image, const glm::vec2& position, const std::optional<glm::vec2>& size = std::nullopt);
+    void drawUIImage(const Image& image, const glm::vec2& position,
+                    const std::optional<glm::vec2>& size = std::nullopt);
 
     /**
      * @brief 绘制填充矩形
@@ -76,7 +79,8 @@ public:
      * @param color 边框颜色
      * @param thickness 边框厚度
      */
-    void drawRect(const Camera& camera, const glm::vec2& position, const glm::vec2& size, const engine::utils::FColor& color, const int thickness = 1);
+    void drawRect(const Camera& camera, const glm::vec2& position, const glm::vec2& size,
+                const engine::utils::FColor& color, const int thickness = 1);
 
     /**
      * @brief 绘制填充矩形
@@ -86,7 +90,20 @@ public:
      * @param size 矩形的大小。
      * @param color 填充颜色
      */
-    void drawFilledRect(const Camera& camera, const glm::vec2& position, const glm::vec2& size, const engine::utils::FColor& color);
+    void drawFilledRect(const Camera& camera, const glm::vec2& position,
+                        const glm::vec2& size, const engine::utils::FColor& color);
+
+    /**
+     * @brief 绘制填充圆形
+     * @note 必须存在默认圆形纹理 "assets/textures/UI/circle.png"
+     *
+     * @param camera 相机，用于坐标转换。
+     * @param center 圆心的中心位置坐标。
+     * @param radius 圆的半径。
+     * @param color 填充颜色
+     */
+    void drawFilledCircle(const Camera& camera, const glm::vec2& center, const float radius,
+                     const engine::utils::FColor& color = engine::utils::FColor::white());
 
     void present();                                                     ///< @brief 更新屏幕，包装 SDL_RenderPresent 函数
     void clearScreen();                                                 ///< @brief 清屏，包装 SDL_RenderClear 函数

@@ -1,6 +1,7 @@
 #pragma once
 #include <entt/entity/fwd.hpp>
 #include <glm/vec2.hpp>
+#include "../defs/events.h"
 
 namespace engine::core {
     class Context;
@@ -46,6 +47,9 @@ private:
     void updatePortraitCover();         ///< @brief 更新肖像遮盖
     void createUnitsPortraitUI();       ///< @brief 创建单位肖像UI
     void arrangeUnitsPortraitUI();      ///< @brief 排列单位肖像UI（肖像增/减时调用）
+
+    // 时间内回调函数
+    void onRemoveUIPortraitEvent(const game::defs::RemoveUIPortraitEvent& event);
 };
 
 } // namespace game::ui

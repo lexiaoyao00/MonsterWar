@@ -29,4 +29,18 @@ struct EnemyDeathEffectEvent{   // 敌人死亡特效事件
     bool is_flipped_{};   // 是否翻转
 };
 
+struct PrepUnitEvent{   // (创建)准备单位事件
+    entt::id_type name_id_{entt::null};  // 单位名称id
+    entt::id_type class_id_{entt::null};  // 单位职业id
+    int cost_{0};   // 单位花费
+};
+
+struct RemoveUIPortraitEvent{   // 移除角色肖像事件
+    entt::id_type name_id_{entt::null};  // 角色名称id
+};
+
+struct RemovePlayerUnitEvent{   // 移除玩家单位事件
+    entt::entity entity_{entt::null};  // 单位实体
+};
+
 }
