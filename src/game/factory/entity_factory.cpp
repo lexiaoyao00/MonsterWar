@@ -16,6 +16,7 @@
 #include "../component/blocker_component.h"
 #include "../component/projectile_component.h"
 #include "../component/unit_prep_component.h"
+#include "../component/skill_component.h"
 #include <entt/entity/registry.hpp>
 #include <entt/core/hashed_string.hpp>
 #include <spdlog/spdlog.h>
@@ -91,6 +92,9 @@ entt::entity EntityFactory::createPlayerUnit(entt::id_type class_id, const glm::
     // 添加ProjectileID组件
     addProjectileComponent(entity, blueprint.projectile_id_);
 
+    // 添加技能组件
+    addSkillComponent(entity, blueprint.player_.skill_id_);
+
     // 补充其他必要组件
     registry_.emplace<game::component::ClassNameComponent>(entity, class_id, blueprint.display_info_.name_);
     registry_.emplace<engine::component::RenderComponent>(entity);  // 使用默认主图层
@@ -151,6 +155,20 @@ entt::entity EntityFactory::createEffect(entt::id_type effect_id, const glm::vec
 
     registry_.emplace<engine::component::RenderComponent>(entity, engine::component::RenderComponent::MAIN_LAYER + 10); // 使用主图层以上的图层
     registry_.emplace<game::defs::OneShotRemoveTag>(entity);
+    return entity;
+}
+
+entt::entity EntityFactory::createSkillDisplay(entt::id_type effect_id, const glm::vec2 &position)
+{
+    auto entity = registry_.create();
+    const auto& effect_blueprint = blueprint_manager_.getEffectBlueprint(effect_id);
+
+    addTransformComponent(entity, position);
+    addSpriteComponent(entity, effect_blueprint.sprite_);
+    // 添加 Animation 组件,显示在角色上方的技能表示,循环播放
+    addOneAnimationComponent(entity, effect_blueprint.animation_, effect_blueprint.sprite_, effect_id, true);
+
+    registry_.emplace<engine::component::RenderComponent>(entity, engine::component::RenderComponent::MAIN_LAYER + 10); // 使用主图层以上的图层
     return entity;
 }
 
@@ -297,6 +315,26 @@ void EntityFactory::addProjectileComponent(entt::entity entity, entt::id_type id
 {
     if (id == entt::null) return;
     registry_.emplace<game::component::ProjectileIDComponent>(entity, id);
+}
+
+void EntityFactory::addSkillComponent(entt::entity entity, entt::id_type skill_id)
+{
+    const auto& skill = blueprint_manager_.getSkillBlueprint(skill_id);
+    registry_.emplace<game::component::SkillComponent>(entity,
+        skill_id,
+        entt::null,
+        skill.name_,
+        skill.description_,
+        skill.cooldown_,
+        skill.duration_,
+        skill.cooldown_ / 2.0f, // 初始技能冷却时间为技能冷却时间的一半
+        0.0f);
+
+    // 如果是被动技能，添加 PassiveSkillTag 与 SkillReadyTag
+    if (skill.passive_) {
+        registry_.emplace<game::defs::PassiveSkillTag>(entity);
+        registry_.emplace<game::defs::SkillReadyTag>(entity);
+    }
 }
 
 }   // namespace game::factory

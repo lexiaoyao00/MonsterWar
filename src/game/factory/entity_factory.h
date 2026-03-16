@@ -28,6 +28,15 @@ public:
     entt::entity createEffect(entt::id_type effect_id, const glm::vec2& postion, const bool is_flipped = false);
 
     /**
+     * @brief 创建角色技能显示(包括特效，图标显示等)
+     *
+     * @param effect_id 特效ID
+     * @param position 位置
+     * @return entt::entity 角色技能显示图标实体
+     */
+    entt::entity createSkillDisplay(entt::id_type effect_id, const glm::vec2& position);
+
+    /**
      * @brief 创建单位准备类型实体
      *
      * @param name_id 单位名称ID
@@ -60,6 +69,7 @@ private:
     void addPlayerComponent(entt::entity entity, const data::PlayerBlueprint& player, int rarity = 1);
     void addAudioComponent(entt::entity entity, const data::SoundBlueprint& sounds);
     void addProjectileComponent(entt::entity entity, entt::id_type id);
+    void addSkillComponent(entt::entity entity, entt::id_type skill_id);
     // TODO: 未来添加其他组件创建函数
 };
 

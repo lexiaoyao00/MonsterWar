@@ -23,4 +23,8 @@ struct MeleePlaceTag{};       ///< @brief 近战攻击单位放置区域标签
 struct RangedPlaceTag{};       ///< @brief 远程攻击单位放置区域标签
 
 struct ShowRangeTag{};       ///< @brief 显示攻击范围标签
+
+struct SkillReadyTag{};       ///< @brief 技能准备标签
+struct SkillActiveTag{};       ///< @brief 技能激活(中)标签
+struct PassiveSkillTag{};       ///< @brief 被动技能标签
 }   // namespace game::defs

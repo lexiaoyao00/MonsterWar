@@ -12,6 +12,8 @@ constexpr engine::utils::FColor RANGE_COLOR = { //攻击范围显示的颜色
     0.0f, 1.0f, 0.0f, 0.3f  // 透明绿色
 };
 
+constexpr glm::vec2 SKILL_DISPLAY_OFFSET = {0.0f, -96.0f};   // 技能图标显示偏移量
+
 constexpr glm::vec2 HEALTH_BAR_SIZE = {48.0f, 8.0f};   // 血条尺寸
 constexpr float HEALTH_BAR_OFFSET_Y = 8.0f;   // 血条Y轴偏移量
 

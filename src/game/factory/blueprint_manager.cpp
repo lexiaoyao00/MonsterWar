@@ -143,6 +143,40 @@ bool BlueprintManager::loadEffectBlueprint(std::string_view effect_json_path)
     }
     return true;
 }
+bool BlueprintManager::loadSkillBlueprint(std::string_view skill_json_path)
+{
+    auto path = std::filesystem::path(skill_json_path);
+    std::ifstream file(path);
+    nlohmann::json json;
+    file >> json;
+    file.close();
+    try {
+        for (auto& [key, data_json] : json.items()){
+            entt::id_type id = entt::hashed_string(key.c_str());
+            std::string name_str = data_json.value("name", "");
+            std::string dcription_str = data_json.value("description", "");
+            bool passive = data_json.value("passive", false);
+            float cooldown = data_json.value("cooldown", 0.0f);
+            float duration = data_json.value("duration", 0.0f);
+
+            game::data::BuffBlueprint buff = parseBuff(data_json);
+
+            skill_blueprints_.emplace(id, data::SkillBlueprint{
+                id,
+                name_str,
+                dcription_str,
+                passive,
+                cooldown,
+                duration,
+                std::move(buff),
+            });
+        }
+    } catch (const std::exception& e) {
+        spdlog::error("加载技能数据时出错: {}", e.what());
+        return false;
+    }
+    return true;
+}
 const data::EnemyClassBlueprint &BlueprintManager::getEnemyClassBlueprint(entt::id_type id) const
 {
     if (auto it = enemy_class_blueprints_.find(id); it != enemy_class_blueprints_.end()) {
@@ -177,6 +211,15 @@ const data::EffectBlueprint &BlueprintManager::getEffectBlueprint(entt::id_type 
     }
     spdlog::error("找不到特效蓝图: {}", id);
     return effect_blueprints_.begin()->second;
+}
+
+const data::SkillBlueprint &BlueprintManager::getSkillBlueprint(entt::id_type id) const
+{
+    if (auto it = skill_blueprints_.find(id); it != skill_blueprints_.end()) {
+        return it->second;
+    }
+    spdlog::error("找不到技能蓝图: {}", id);
+    return skill_blueprints_.begin()->second;
 }
 
 entt::id_type BlueprintManager::parseProjectileID(const nlohmann::json &json)
@@ -311,4 +354,15 @@ data::DisplayInfoBlueprint BlueprintManager::parseDisplayInfo(const nlohmann::js
     };
 }
 
+data::BuffBlueprint BlueprintManager::parseBuff(const nlohmann::json &json)
+{
+    return data::BuffBlueprint{
+        json.value("hp", 1.0f),
+        json.value("akt", 1.0f),
+        json.value("def", 1.0f),
+        json.value("range", 1.0f),
+        json.value("atk_interval", 1.0f),
+        json.value("cost_regen", 0.0f),
+    };
+}
 }

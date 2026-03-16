@@ -19,4 +19,5 @@ class PlaceUnitSystem;
 class RenderRangeSystem;
 class DebugUISystem;
 class SelectionSystem;
+class SkillSystem;
 }

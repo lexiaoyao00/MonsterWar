@@ -49,4 +49,17 @@ struct RemovePlayerUnitEvent{   // 移除玩家单位事件
     entt::entity entity_{entt::null};  // 单位实体
 };
 
+struct SkillReadyEvent{   // 技能准备事件
+    entt::entity entity_{entt::null};  // 角色实体
+};
+
+struct SkillActiveEvent{   // 技能激活事件
+    entt::entity entity_{entt::null};  // 角色实体
+};
+
+struct SkillDurationEndEvent{   // 技能持续时间结束事件
+    entt::entity entity_{entt::null};  // 角色实体
+};
+
+
 }

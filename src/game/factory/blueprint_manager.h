@@ -23,6 +23,7 @@ private:
     std::unordered_map<entt::id_type, data::PlayerClassBlueprint> player_class_blueprints_;   // 玩家职业蓝图
     std::unordered_map<entt::id_type, data::ProjectileBlueprint> projectile_blueprints_;        // 投射物蓝图
     std::unordered_map<entt::id_type, data::EffectBlueprint> effect_blueprints_;            // 特效蓝图
+    std::unordered_map<entt::id_type, data::SkillBlueprint> skill_blueprints_;            // 技能蓝图
     // TODO:后面可以添加其他蓝图容器
 
 public:
@@ -32,11 +33,13 @@ public:
     [[nodiscard]] bool loadPlayerClassBlueprint(std::string_view player_json_path); // 加载玩家职业蓝图
     [[nodiscard]] bool loadProjectileBlueprint(std::string_view projectile_json_path); // 加载投射物蓝图
     [[nodiscard]] bool loadEffectBlueprint(std::string_view effect_json_path); // 加载特效蓝图
+    [[nodiscard]] bool loadSkillBlueprint(std::string_view skill_json_path); // 加载技能蓝图
 
     const data::EnemyClassBlueprint& getEnemyClassBlueprint(entt::id_type id) const;    // 获取敌人类型蓝图
     const data::PlayerClassBlueprint& getPlayerClassBlueprint(entt::id_type id) const; // 获取玩家职业蓝图
     const data::ProjectileBlueprint& getProjectileBlueprint(entt::id_type id) const;   // 获取投射物蓝图
     const data::EffectBlueprint& getEffectBlueprint(entt::id_type id) const;           // 获取特效蓝图
+    const data::SkillBlueprint& getSkillBlueprint(entt::id_type id) const;           // 获取技能蓝图
 
 private:
     // 分别针对各个子蓝图进行json解析，并创建（返回）对应的蓝图结构
@@ -49,6 +52,7 @@ private:
     data::EnemyBlueprint parseEnemy(const nlohmann::json& json);
     data::PlayerBlueprint parsePlayer(const nlohmann::json& json);
     data::DisplayInfoBlueprint parseDisplayInfo(const nlohmann::json& json);
+    data::BuffBlueprint parseBuff(const nlohmann::json& json);
 };
 
 }

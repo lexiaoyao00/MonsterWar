@@ -37,6 +37,7 @@
 #include "../system/render_range_system.h"
 #include "../system/debug_ui_system.h"
 #include "../system/selection_system.h"
+#include "../system/skill_system.h"
 #include "../component/enemy_component.h"
 #include "../component/player_component.h"
 #include "../component/stats_component.h"
@@ -86,7 +87,7 @@ void GameScene::update(float delta_time) {
     remove_dead_system_->update(registry_);
 
     // 注意系统更新顺序
-    timer_system_->update(registry_, delta_time);
+    timer_system_->update(delta_time);
     game_rule_system_->update(delta_time);
     set_target_system_->update(registry_);
     orientation_system_->update(registry_);
@@ -244,7 +245,8 @@ bool GameScene::initEntityFactory()
         if (!blueprint_manager_->loadEnemyClassBlueprint("assets/data/enemy_data.json") ||
             !blueprint_manager_->loadPlayerClassBlueprint("assets/data/player_data.json") ||
             !blueprint_manager_->loadProjectileBlueprint("assets/data/projectile_data.json") ||
-            !blueprint_manager_->loadEffectBlueprint("assets/data/effect_data.json")) {
+            !blueprint_manager_->loadEffectBlueprint("assets/data/effect_data.json") ||
+            !blueprint_manager_->loadSkillBlueprint("assets/data/skill_data.json")) {
             spdlog::error("加载蓝图失败");
             return false;
         }
@@ -271,7 +273,7 @@ bool GameScene::initSystems()
     attack_starter_system_ = std::make_unique<game::system::AttackStarterSystem>();
     orientation_system_ = std::make_unique<game::system::OrientationSystem>();
     set_target_system_ = std::make_unique<game::system::SetTargetSystem>();
-    timer_system_ = std::make_unique<game::system::TimerSystem>();
+    timer_system_ = std::make_unique<game::system::TimerSystem>(registry_, dispatcher);
     animation_state_system_ = std::make_unique<game::system::AnimationStateSystem>(registry_, dispatcher);
     animation_event_system_ = std::make_unique<game::system::AnimationEventSystem>(registry_, dispatcher);
     combat_resolve_system_ = std::make_unique<game::system::CombatResolveSystem>(registry_, dispatcher);
@@ -283,6 +285,7 @@ bool GameScene::initSystems()
     render_range_system_ = std::make_unique<game::system::RenderRangeSystem>();
     debug_ui_system_ = std::make_unique<game::system::DebugUISystem>(registry_, context_);
     selection_system_ = std::make_unique<game::system::SelectionSystem>(registry_, context_);
+    skill_system_ = std::make_unique<game::system::SkillSystem>(registry_, dispatcher, *entity_factory_);
 
     spdlog::info("系统初始化完成");
     return true;
