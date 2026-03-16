@@ -365,6 +365,8 @@ set(SOURCES
     src/game/system/game_rule_system.cpp
     src/game/system/place_unit_system.cpp
     src/game/system/render_range_system.cpp
+    src/game/system/debug_ui_system.cpp
+    src/game/system/selection_system.cpp
     src/game/factory/blueprint_manager.cpp
     src/game/factory/entity_factory.cpp
     src/game/data/session_data.cpp

@@ -26,7 +26,7 @@ enum class State {
  * 以便其他系统（输入、渲染、更新等）可以相应地调整其行为。
  */
 class GameState final {
-private:    
+private:
     SDL_Window* window_ = nullptr;              ///< @brief SDL窗口，用于获取窗口大小
     SDL_Renderer* renderer_ = nullptr;          ///< @brief SDL渲染器，用于获取逻辑分辨率
     State current_state_ = State::Title;        ///< @brief 当前游戏状态
@@ -47,6 +47,9 @@ public:
     glm::vec2 getLogicalSize() const;
     void setLogicalSize(const glm::vec2& logical_size);
 
+    // 关闭/启用逻辑分辨率的函数，主要用于ImGui使用
+    bool disableLogicalPresentation();  // 关闭逻辑分辨率，返回是否成功
+    bool enableLogicalPresentation();   // 开启逻辑分辨率，返回是否成功
 
     // --- 便捷查询方法 ---
 

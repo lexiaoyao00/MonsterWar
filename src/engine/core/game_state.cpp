@@ -46,12 +46,27 @@ glm::vec2 GameState::getLogicalSize() const
 
 void GameState::setLogicalSize(const glm::vec2& logical_size)
 {
-    SDL_SetRenderLogicalPresentation(renderer_, 
-                                     static_cast<int>(logical_size.x), 
+    SDL_SetRenderLogicalPresentation(renderer_,
+                                     static_cast<int>(logical_size.x),
                                      static_cast<int>(logical_size.y),
                                      SDL_LOGICAL_PRESENTATION_LETTERBOX);
     spdlog::trace("逻辑分辨率设置为: {}x{}", logical_size.x, logical_size.y);
 }
 
+bool GameState::disableLogicalPresentation()
+{
+    int width, height;
+    // SDL3获取逻辑分辨率的方法
+    SDL_GetRenderLogicalPresentation(renderer_, &width, &height, NULL);
+    return SDL_SetRenderLogicalPresentation(renderer_, width, height, SDL_LOGICAL_PRESENTATION_DISABLED);
+}
 
-} // namespace engine::core 
+bool GameState::enableLogicalPresentation()
+{
+    int width, height;
+    // SDL3获取逻辑分辨率的方法
+    SDL_GetRenderLogicalPresentation(renderer_, &width, &height, NULL);
+    return SDL_SetRenderLogicalPresentation(renderer_, width, height, SDL_LOGICAL_PRESENTATION_LETTERBOX);
+}
+
+} // namespace engine::core
