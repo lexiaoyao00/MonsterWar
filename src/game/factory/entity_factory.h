@@ -25,6 +25,7 @@ public:
     entt::entity createPlayerUnit(entt::id_type class_id, const glm::vec2& position, int level = 1, int rarity = 1);
     entt::entity createProjectile(entt::id_type id, const glm::vec2& start_position, const glm::vec2& target_position, entt::entity target, float damage);
     entt::entity createEnemyDeadEffect(entt::id_type class_id, const glm::vec2& position, const bool is_flipped = false);
+    entt::entity createEffect(entt::id_type effect_id, const glm::vec2& postion, const bool is_flipped = false);
 
     /**
      * @brief 创建单位准备类型实体

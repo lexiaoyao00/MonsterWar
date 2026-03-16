@@ -27,5 +27,6 @@ public:
 private:
     // 事件回调函数
     void onEnemyDeadEffectEvent(const game::defs::EnemyDeathEffectEvent& event);    // 敌人死亡特效
+    void onEffectEvent(const game::defs::EffectEvent& event);                        // 通用特效事件
 };
 }

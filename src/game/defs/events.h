@@ -29,6 +29,12 @@ struct EnemyDeathEffectEvent{   // 敌人死亡特效事件
     bool is_flipped_{};   // 是否翻转
 };
 
+struct EffectEvent{   // (通用)特效事件
+    entt::id_type name_id_{entt::null};  // 特效id
+    glm::vec2 position_{};   // 位置
+    bool is_flipped_{false};   // 是否翻转
+};
+
 struct PrepUnitEvent{   // (创建)准备单位事件
     entt::id_type name_id_{entt::null};  // 单位名称id
     entt::id_type class_id_{entt::null};  // 单位职业id

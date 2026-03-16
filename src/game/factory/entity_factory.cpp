@@ -140,6 +140,20 @@ entt::entity EntityFactory::createEnemyDeadEffect(entt::id_type class_id, const 
     return entity;
 }
 
+entt::entity EntityFactory::createEffect(entt::id_type effect_id, const glm::vec2 &postion, const bool is_flipped)
+{
+    auto entity = registry_.create();
+    const auto& blueprint = blueprint_manager_.getEffectBlueprint(effect_id);
+
+    addTransformComponent(entity, postion);
+    addSpriteComponent(entity, blueprint.sprite_, is_flipped);
+    addOneAnimationComponent(entity, blueprint.animation_, blueprint.sprite_, effect_id);
+
+    registry_.emplace<engine::component::RenderComponent>(entity, engine::component::RenderComponent::MAIN_LAYER + 10); // 使用主图层以上的图层
+    registry_.emplace<game::defs::OneShotRemoveTag>(entity);
+    return entity;
+}
+
 entt::entity EntityFactory::createUnitPrep(entt::id_type name_id, entt::id_type class_id, int cost, const glm::vec2 &position)
 {
     auto entity = registry_.create();
