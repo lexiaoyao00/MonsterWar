@@ -61,5 +61,24 @@ struct SkillDurationEndEvent{   // 技能持续时间结束事件
     entt::entity entity_{entt::null};  // 角色实体
 };
 
+struct UIPortraitHoverEnterEvent{   // 肖像UI鼠标悬停事件
+    entt::id_type name_id_{entt::null};  // 角色名称id
+};
+struct UIPortraitHoverLeaveEvent{};   // 肖像UI鼠标悬停离开事件
+
+struct UpgradeUnitEvent {   // 升级单位事件
+    entt::entity entity_{entt::null};  // 单位实体
+    int cost_{0};   // 单位花费
+};
+
+struct RetreatEvent {   // 退兵事件
+    entt::entity entity_{entt::null};  // 单位实体
+    int cost_{0};   // 单位花费
+};
+
+struct RestartEvent {};   // 重启事件
+struct BackToTitleEvent {};   // 返回标题事件
+struct SaveEvent {};   // 保存事件
+struct LevelClearEvent {};   // 关卡通过事件
 
 }

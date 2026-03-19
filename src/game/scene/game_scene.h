@@ -80,7 +80,11 @@ private:
     entt::entity selected_unit_{entt::null};  // 游戏中鼠标选中的单位
     entt::entity hovered_unit_{entt::null};  // 游戏中鼠标悬停的单位
 public:
-    GameScene(engine::core::Context& context);
+    GameScene(engine::core::Context& context,
+        std::shared_ptr<game::factory::BlueprintManager> blueprint_manager = nullptr,
+        std::shared_ptr<game::data::SessionData> session_data = nullptr,
+        std::shared_ptr<game::data::UIConfig> ui_config = nullptr,
+        std::shared_ptr<game::data::LevelConfig> level_config = nullptr);
     ~GameScene();
 
     void init() override;
@@ -101,8 +105,11 @@ private:
     [[nodiscard]] bool initEnemySpawner();
     [[nodiscard]] bool initUnitsPortraitUI();
 
-    // 测试函数
-    bool onClearAllPlayers();
+    // 场景相关函数
+    void onRestart();
+    void onBackToTitle();
+    void onSave();
+    void onLevelClear();
 
 };
 
