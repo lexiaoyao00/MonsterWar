@@ -72,7 +72,8 @@ void AttackStarterSystem::updatePlayer(entt::registry &registry, entt::dispatche
         }
 
         registry.remove<game::defs::AttackReadyTag>(player_entity);
-        // 玩家是静止不动的，不需要添加动作锁定标签
+        // 添加动作锁定标签，确保攻击动画执行完毕后再执行其他动作
+        registry.emplace_or_replace<game::defs::ActionLockTag>(player_entity);
         spdlog::info("Player attack");
     }
 }
