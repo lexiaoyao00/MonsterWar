@@ -6,6 +6,10 @@ namespace engine::core {
     class Context;
 }
 
+namespace game::scene {
+    class TitleScene;
+}
+
 namespace game::system {
 
 /**
@@ -25,7 +29,8 @@ public:
     ~DebugUISystem();
 
     // ImGui 步骤3: 一轮循环内，ImGui 需要做的操作（逻辑+渲染）
-    void update();
+    void update();  // 针对主场景的更新
+    void updateTitle(game::scene::TitleScene& title_scene);  // 针对标题场景的更新
 
 private:
     // 封装开始、结束帧的方法
@@ -33,12 +38,23 @@ private:
     void endFrame();
 
     // 封装每个UI显示模块
+    // --- 主场景 ---
     void renderHoveredPortrait();
     void renderHoveredUnit();
     void renderSelectedUnit();
     void renderInfoUI();
     void renderSettingsUI();
     void renderDebugUI();
+
+    // --- 标题场景 ---
+    void renderTitleLogo();
+    void renderTitleButtons(game::scene::TitleScene& title_scene);
+
+    // 共通数据
+    void renderUnitInfoUI(bool& show_unit_info);
+    void renderSavePanelUI(bool& show_save_panel);
+    void renderLoadPanelUI(bool& show_load_panel);
+    void renderUnitTable();
 
     // 事件回调函数
     void onUIPortraitHoverEnterEvent(const game::defs::UIPortraitHoverEnterEvent& event);

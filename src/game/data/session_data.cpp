@@ -45,6 +45,9 @@ bool SessionData::loadDefaultData(std::string_view path)
         return false;
     }
 
+    // 加载完成后将数据同步到 list 中
+    mapUnitDataList();
+
     return true;
 
 }
@@ -88,6 +91,15 @@ bool SessionData::saveToFile(std::string_view path)
     return true;
 }
 
+void SessionData::mapUnitDataList()
+{
+    unit_data_list_.clear();
+    unit_data_list_.reserve(unit_map_.size());
+    for (auto& [id, data] : unit_map_){
+        unit_data_list_.push_back(&data);
+    }
+}
+
 void SessionData::addUnit(std::string_view name, std::string_view class_str, int level, int rarity)
 {
     entt::id_type name_id = entt::hashed_string(name.data());
@@ -95,11 +107,16 @@ void SessionData::addUnit(std::string_view name, std::string_view class_str, int
 
     unit_map_.emplace(name_id,
         UnitData{name_id, class_id, std::string(name), std::string(class_str), level, rarity});
+    unit_data_list_.push_back(&unit_map_[name_id]);
 }
 
 void SessionData::removeUnit(entt::id_type name_id)
 {
     if (auto it = unit_map_.find(name_id); it != unit_map_.end()) {
+        unit_data_list_.erase(std::remove(unit_data_list_.begin(),
+                                          unit_data_list_.end(),
+                                          &unit_map_[name_id]),
+                             unit_data_list_.end());
         unit_map_.erase(it);
     } else {
         spdlog::error("尝试删除不存在的角色: {}", name_id);
@@ -127,12 +144,14 @@ void SessionData::addUnitRarity(entt::id_type name_id, int add_rarity)
 void SessionData::clearUnits()
 {
     unit_map_.clear();
+    unit_data_list_.clear();
 }
 
 void SessionData::clear()
 {
     level_number_ = 1;
     unit_map_.clear();
+    unit_data_list_.clear();
 }
 
 }   // namespace game::data

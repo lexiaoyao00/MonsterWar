@@ -27,6 +27,9 @@ private:
     // 存储角色信息
     std::unordered_map<entt::id_type, UnitData> unit_map_;
 
+    // 存储角色数据的指针，与unit_map_同步，用于排序
+    std::vector<UnitData*> unit_data_list_;
+
 public:
     SessionData() = default;
     ~SessionData() = default;
@@ -34,6 +37,8 @@ public:
     bool loadDefaultData(std::string_view path = "assets/data/default_session_data.json");
     bool loadFromFile(std::string_view path);
     bool saveToFile(std::string_view path);
+
+    void mapUnitDataList();    // 将 unit_map_ 映射到 unit_data_list_
 
     void addUnit(std::string_view name, std::string_view class_str, int level, int rarity);
     void removeUnit(entt::id_type name_id);
@@ -48,6 +53,7 @@ public:
 
     // getters
     [[nodiscard]] std::unordered_map<entt::id_type, UnitData>& getUnitMap() {return unit_map_;}
+    [[nodiscard]] std::vector<UnitData*>& getUnitDataList() {return unit_data_list_;}
     [[nodiscard]] UnitData& getUnitData(entt::id_type name_id) { return unit_map_[name_id]; }
     [[nodiscard]] int getLevelNumber() const {return level_number_;}
     [[nodiscard]] int getPoint() const {return point_;}

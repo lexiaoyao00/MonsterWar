@@ -1,4 +1,5 @@
 #include "game_scene.h"
+#include "title_scene.h"
 #include "../../engine/core/context.h"
 #include "../../engine/core/game_state.h"
 #include "../../engine/input/input_manager.h"
@@ -238,6 +239,7 @@ bool GameScene::initRegistryContext()
     registry_.ctx().emplace<int&>(level_number_);
     registry_.ctx().emplace_as<entt::entity&>("selected_unit"_hs, selected_unit_);
     registry_.ctx().emplace_as<entt::entity&>("hovered_unit"_hs, hovered_unit_);
+    registry_.ctx().emplace_as<bool&>("show_save_panel"_hs, show_save_panel_);
     spdlog::info("registry_ 上下文初始化完成");
     return true;
 }
@@ -272,11 +274,13 @@ void GameScene::onRestart()
 void GameScene::onBackToTitle()
 {
     spdlog::info("返回标题场景");
+    requestReplaceScene(std::make_unique<game::scene::TitleScene>(context_));
 }
 
 void GameScene::onSave()
 {
     spdlog::info("保存游戏");
+    show_save_panel_ = !show_save_panel_;
 }
 
 void GameScene::onLevelClear()
