@@ -111,6 +111,7 @@ private:
     void onBackToTitle();
     void onSave();
     void onLevelClear();
+    void onGameEndEvent(const game::defs::GameEndEvent& event);
 
 };
 

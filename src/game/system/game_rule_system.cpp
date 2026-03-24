@@ -18,6 +18,9 @@ GameRuleSystem::GameRuleSystem(entt::registry &registry, entt::dispatcher &dispa
     : registry_(registry), dispatcher_(dispatcher)
 {
     dispatcher_.sink<game::defs::EnemyArriveHomeEvent>().connect<&GameRuleSystem::onEnemyArriveHome>(this);
+    dispatcher_.sink<game::defs::UpgradeUnitEvent>().connect<&GameRuleSystem::onUpgradeUnitEvent>(this);
+    dispatcher_.sink<game::defs::RetreatEvent>().connect<&GameRuleSystem::onRetreatEvent>(this);
+    dispatcher_.sink<game::defs::LevelClearDelayedEvent>().connect<&GameRuleSystem::onLevelClearDelayedEvent>(this);
 }
 
 GameRuleSystem::~GameRuleSystem()
@@ -36,6 +39,14 @@ void GameRuleSystem::update(float delta_time){
         auto& cost_regen = view_cost_regen.get<game::component::CostRegenComponent>(entity);
         game_stats.cost_ += cost_regen.rate_* delta_time;
     }
+    // 已经通关，计时器归零后切换场景
+    if (is_level_clear_) {
+        level_clear_timer_ -= delta_time;
+        if (level_clear_timer_ <= 0) {
+            dispatcher_.enqueue(game::defs::LevelClearEvent{});
+            is_level_clear_ = false;
+        }
+    }
 }
 
 void GameRuleSystem::onEnemyArriveHome(const game::defs::EnemyArriveHomeEvent &)
@@ -46,7 +57,12 @@ void GameRuleSystem::onEnemyArriveHome(const game::defs::EnemyArriveHomeEvent &)
     game_stats.home_hp_ -= 1;
     if (game_stats.home_hp_ <= 0) {
         spdlog::warn("基地被摧毁");
-        // TODO: 游戏结束 切换场景
+        // 游戏失败
+        dispatcher_.enqueue(game::defs::GameEndEvent{false});
+    }
+    else if ((game_stats.enemy_arrived_count_ + game_stats.enemy_killed_count_) >= game_stats.enemy_count_) {
+        // 游戏胜利
+        dispatcher_.enqueue(game::defs::LevelClearDelayedEvent{});
     }
 }
 
@@ -82,6 +98,12 @@ void GameRuleSystem::onRetreatEvent(const game::defs::RetreatEvent &event)
     game_stats.cost_ += event.cost_;
     // 发送移除单位事件
     dispatcher_.enqueue(game::defs::RemovePlayerUnitEvent{event.entity_});
+}
+
+void GameRuleSystem::onLevelClearDelayedEvent(const game::defs::LevelClearDelayedEvent &event)
+{
+    is_level_clear_ = true;
+    level_clear_timer_ = event.delay_time_;
 }
 
 }   // namespace game::system

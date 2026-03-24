@@ -79,6 +79,12 @@ struct RetreatEvent {   // 退兵事件
 struct RestartEvent {};   // 重启事件
 struct BackToTitleEvent {};   // 返回标题事件
 struct SaveEvent {};   // 保存事件
-struct LevelClearEvent {};   // 关卡通过事件
+struct LevelClearEvent {};   // 关卡通过事件(立刻切换场景)
+struct LevelClearDelayedEvent {   // 关卡通过事件(延迟切换场景)
+    float delay_time_{3.0f};   // 延迟时间
+};
+struct GameEndEvent {   // 游戏结束事件
+    bool is_win_{false};   // 是否胜利
+};
 
 }

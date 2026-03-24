@@ -8,6 +8,8 @@ namespace engine::core {
 
 namespace game::scene {
     class TitleScene;
+    class LevelClearScene;
+    class EndScene;
 }
 
 namespace game::system {
@@ -31,6 +33,8 @@ public:
     // ImGui 步骤3: 一轮循环内，ImGui 需要做的操作（逻辑+渲染）
     void update();  // 针对主场景的更新
     void updateTitle(game::scene::TitleScene& title_scene);  // 针对标题场景的更新
+    void updateLevelClear(game::scene::LevelClearScene& level_clear_scene);  // 针对关卡结束场景的更新
+    void updateEnd(game::scene::EndScene& end_scene);  // 针对游戏结束场景的更新
 
 private:
     // 封装开始、结束帧的方法
@@ -49,6 +53,15 @@ private:
     // --- 标题场景 ---
     void renderTitleLogo();
     void renderTitleButtons(game::scene::TitleScene& title_scene);
+
+    // --- 关卡结束场景 ---
+    void renderLevelClearText();
+    void renderLevelClearTable(game::scene::LevelClearScene& level_clear_scene);
+    void renderLevelClearButtons(game::scene::LevelClearScene& level_clear_scene);
+
+    // --- 游戏结束场景 ---
+    void renderEndText(game::scene::EndScene& end_scene);
+    void renderEndButtons(game::scene::EndScene& end_scene);
 
     // 共通数据
     void renderUnitInfoUI(bool& show_unit_info);
